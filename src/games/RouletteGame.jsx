@@ -18,24 +18,20 @@ export default function RouletteGame({ participants, bet, onBack, onHome }) {
     const cx = canvas.width / 2, cy = canvas.height / 2, r = cx - 8;
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     ctx.save();
-    ctx.shadowColor = "rgba(0,0,0,0.5)";
-    ctx.shadowBlur = 20;
+    ctx.shadowColor = "rgba(0,0,0,0.5)"; ctx.shadowBlur = 20;
     ctx.beginPath(); ctx.arc(cx, cy, r, 0, 2 * Math.PI);
     ctx.fillStyle = "#111"; ctx.fill();
     ctx.restore();
     for (let i = 0; i < n; i++) {
-      const start = rot + i * sliceAngle;
-      const end = start + sliceAngle;
+      const start = rot + i * sliceAngle, end = start + sliceAngle;
       ctx.beginPath(); ctx.moveTo(cx, cy);
       ctx.arc(cx, cy, r, start, end); ctx.closePath();
       ctx.fillStyle = COLORS[i % COLORS.length]; ctx.fill();
       ctx.strokeStyle = "#0d0d1a"; ctx.lineWidth = 2; ctx.stroke();
       ctx.save();
-      ctx.translate(cx, cy);
-      ctx.rotate(start + sliceAngle / 2);
-      ctx.textAlign = "right";
-      ctx.fillStyle = "#fff";
-      ctx.font = `bold ${n > 6 ? 11 : 14}px 'Pretendard','Apple SD Gothic Neo',sans-serif`;
+      ctx.translate(cx, cy); ctx.rotate(start + sliceAngle / 2);
+      ctx.textAlign = "right"; ctx.fillStyle = "#fff";
+      ctx.font = `bold ${n > 6 ? 11 : 14}px 'Pretendard',sans-serif`;
       ctx.shadowColor = "rgba(0,0,0,0.6)"; ctx.shadowBlur = 4;
       ctx.fillText(participants[i], r - 12, 5);
       ctx.restore();
@@ -49,37 +45,39 @@ export default function RouletteGame({ participants, bet, onBack, onHome }) {
 
   const spin = () => {
     if (spinning) return;
-    setSpinning(true);
-    setWinner(null);
-
-    // 쫄깃한 속도: 빠르게 가속 → 오래 고속 유지 → 아주 천천히 감속
-    const totalRot = (Math.random() * 5 + 10) * 2 * Math.PI;
-    const duration = 7000; // 7초로 늘림
+    setSpinning(true); setWinner(null);
+    // 힘차게 시작 → 빠르게 감속 → 마지막에 끈적하게 멈춤
+    const totalRot = (Math.random() * 4 + 8) * 2 * Math.PI;
+    const duration = 5500;
     const start = performance.now();
     const startRot = rotRef.current;
 
-    const easeInOutCustom = (t) => {
-      // 앞 20%: 빠르게 가속, 중간 50%: 고속 유지, 뒤 30%: 매우 천천히 감속
-      if (t < 0.2) return (t / 0.2) * (t / 0.2) * 0.4;
-      if (t < 0.7) return 0.4 + (t - 0.2) / 0.5 * 0.45;
-      // 마지막 30%: cubic ease-out으로 쫄깃하게
-      const r = (t - 0.7) / 0.3;
-      return 0.85 + (1 - Math.pow(1 - r, 3)) * 0.15;
+    // ease: 초반 폭발적, 중반 급감속, 후반 끈적한 슬로우
+    const easeOut = (t) => {
+      if (t < 0.15) {
+        // 0~15%: 빠르게 가속 (초반 힘참)
+        return (t / 0.15) * 0.35;
+      } else if (t < 0.55) {
+        // 15~55%: 빠르게 감속
+        const r = (t - 0.15) / 0.4;
+        return 0.35 + r * 0.45;
+      } else {
+        // 55~100%: 끈적하게 마무리 (cubic ease-out)
+        const r = (t - 0.55) / 0.45;
+        return 0.8 + (1 - Math.pow(1 - r, 4)) * 0.2;
+      }
     };
 
     const animate = (now) => {
-      const elapsed = now - start;
-      const t = Math.min(elapsed / duration, 1);
-      const ease = easeInOutCustom(t);
-      const cur = startRot + totalRot * ease;
+      const t = Math.min((now - start) / duration, 1);
+      const cur = startRot + totalRot * easeOut(t);
       rotRef.current = cur;
       drawWheel(cur);
       if (t < 1) {
         animRef.current = requestAnimationFrame(animate);
       } else {
         const finalAngle = (cur % (2 * Math.PI) + 2 * Math.PI) % (2 * Math.PI);
-        const pointerAngle = (2 * Math.PI - finalAngle) % (2 * Math.PI);
-        const idx = Math.floor(pointerAngle / sliceAngle) % n;
+        const idx = Math.floor(((2 * Math.PI - finalAngle) % (2 * Math.PI)) / sliceAngle) % n;
         setWinner(participants[idx]);
         setSpinning(false);
       }

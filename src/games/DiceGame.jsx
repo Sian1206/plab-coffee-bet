@@ -1,151 +1,197 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 const COLORS = ["#f97316","#8b5cf6","#22c55e","#ec4899","#eab308","#14b8a6","#60a5fa","#f43f5e"];
 
 const DICE_DOTS = {
-  1: [[50,50]],
-  2: [[28,28],[72,72]],
-  3: [[28,28],[50,50],[72,72]],
-  4: [[28,28],[72,28],[28,72],[72,72]],
-  5: [[28,28],[72,28],[50,50],[28,72],[72,72]],
-  6: [[28,28],[72,28],[28,50],[72,50],[28,72],[72,72]],
+  1:[[50,50]],2:[[28,28],[72,72]],3:[[28,28],[50,50],[72,72]],
+  4:[[28,28],[72,28],[28,72],[72,72]],5:[[28,28],[72,28],[50,50],[28,72],[72,72]],
+  6:[[28,28],[72,28],[28,50],[72,50],[28,72],[72,72]],
 };
 
-function DiceFace({ value, color, size = 64 }) {
+function DiceCanvas({ value, color, x, y, angle, size = 80 }) {
   const scale = size / 100;
   const dots = DICE_DOTS[value] || DICE_DOTS[1];
   return (
-    <svg width={size} height={size}>
-      <rect x={2} y={2} width={size-4} height={size-4} rx={size*0.15} fill={color + "22"} stroke={color} strokeWidth={2} />
+    <g transform={`translate(${x - size/2}, ${y - size/2}) rotate(${angle}, ${size/2}, ${size/2})`}>
+      <rect x={3} y={3} width={size-6} height={size-6} rx={size*0.15}
+        fill={color + "33"} stroke={color} strokeWidth={2.5}
+        style={{ filter: `drop-shadow(0 0 8px ${color}88)` }} />
       {dots.map(([cx, cy], i) => (
-        <circle key={i} cx={cx*scale} cy={cy*scale} r={size*0.08} fill={color} />
+        <circle key={i} cx={cx*scale} cy={cy*scale} r={size*0.085} fill={color} />
       ))}
-    </svg>
-  );
-}
-
-function DiceThrow({ playerName, playerIdx, color, onResult }) {
-  const [rolling, setRolling] = useState(false);
-  const [dice, setDice] = useState([null, null]);
-  const [done, setDone] = useState(false);
-  const [dragStart, setDragStart] = useState(null);
-  const [holding, setHolding] = useState(false);
-  const holdRef = useRef(null);
-  const holdStartRef = useRef(null);
-  const throwAreaRef = useRef(null);
-
-  const startHold = (clientX, clientY) => {
-    setHolding(true);
-    holdStartRef.current = Date.now();
-    setDragStart({ x: clientX, y: clientY });
-  };
-
-  const endThrow = (clientX, clientY) => {
-    if (!holding || !dragStart) return;
-    setHolding(false);
-    const holdTime = Date.now() - holdStartRef.current;
-    const dx = clientX - dragStart.x;
-    const dy = clientY - dragStart.y;
-    const speed = Math.sqrt(dx * dx + dy * dy);
-    const strength = Math.min(holdTime / 800, 1); // 0~1
-
-    // 강도 + 드래그 속도 반영하여 주사위 결과 계산
-    const totalPower = strength * 0.5 + (speed / 150) * 0.5;
-    doRoll(totalPower);
-  };
-
-  const doRoll = (power = 0.5) => {
-    if (rolling || done) return;
-    setRolling(true);
-    setDice([null, null]);
-
-    const ticks = Math.floor(8 + power * 14); // 강도에 따라 굴리는 횟수
-    let tick = 0;
-    const interval = setInterval(() => {
-      setDice([Math.floor(Math.random() * 6) + 1, Math.floor(Math.random() * 6) + 1]);
-      tick++;
-      if (tick >= ticks) {
-        clearInterval(interval);
-        const d1 = Math.floor(Math.random() * 6) + 1;
-        const d2 = Math.floor(Math.random() * 6) + 1;
-        setDice([d1, d2]);
-        setRolling(false);
-        setDone(true);
-        onResult(d1 + d2);
-      }
-    }, Math.max(40, 120 - power * 60));
-  };
-
-  return (
-    <div style={{ background: done ? `${color}15` : "rgba(255,255,255,0.04)", border: done ? `1.5px solid ${color}55` : "1px solid rgba(255,255,255,0.08)", borderRadius: 18, padding: "14px 16px", transition: "all 0.3s" }}>
-      <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: done || rolling ? 12 : 0 }}>
-        <div style={{ fontWeight: 700, fontSize: 15, color, flex: 1 }}>{playerName}</div>
-        {done && <div style={{ fontSize: 18, fontWeight: 900, color }}>합계 {dice[0] + dice[1]}</div>}
-      </div>
-
-      {(done || rolling) && (
-        <div style={{ display: "flex", gap: 10, justifyContent: "center", marginBottom: 8 }}>
-          {dice.map((d, i) => d !== null ? (
-            <div key={i} style={{ animation: rolling ? "shake 0.1s infinite" : "popIn 0.3s ease", filter: rolling ? "blur(1px)" : "none" }}>
-              <DiceFace value={d} color={color} size={56} />
-            </div>
-          ) : <div key={i} style={{ width: 56, height: 56, borderRadius: 8, background: "rgba(255,255,255,0.06)", border: `1px dashed ${color}44` }} />)}
-        </div>
-      )}
-
-      {!done && (
-        <div
-          ref={throwAreaRef}
-          onMouseDown={e => startHold(e.clientX, e.clientY)}
-          onMouseUp={e => endThrow(e.clientX, e.clientY)}
-          onMouseLeave={e => { if (holding) endThrow(e.clientX, e.clientY); }}
-          onTouchStart={e => startHold(e.touches[0].clientX, e.touches[0].clientY)}
-          onTouchEnd={e => endThrow(e.changedTouches[0].clientX, e.changedTouches[0].clientY)}
-          style={{ background: holding ? `${color}33` : `${color}15`, border: `2px dashed ${color}66`, borderRadius: 14, padding: "16px", textAlign: "center", cursor: "pointer", transition: "all 0.15s", userSelect: "none", touchAction: "none" }}>
-          <div style={{ fontSize: 28, marginBottom: 4 }}>🎲🎲</div>
-          <div style={{ fontSize: 12, color: "#aaa" }}>{holding ? "놓으면 던져요!" : "꾹 누른 후 드래그해서 던지세요"}</div>
-          {holding && <div style={{ fontSize: 11, color, marginTop: 4, fontWeight: 700 }}>충전 중... {Math.round(Math.min((Date.now() - (holdStartRef.current || Date.now())) / 8, 100))}%</div>}
-        </div>
-      )}
-    </div>
+    </g>
   );
 }
 
 export default function DiceGame({ participants, bet, onBack, onHome }) {
   const n = participants.length;
-  const [results, setResults] = useState({});
-  const [done, setDone] = useState(false);
-  const [key, setKey] = useState(0);
+  const [currentIdx, setCurrentIdx] = useState(0);
+  const [results, setResults] = useState([]); // [{name, score, color}]
+  const [phase, setPhase] = useState("idle"); // idle | throwing | rolling | done
+  const [diceVal, setDiceVal] = useState(6);
+  const [dicePos, setDicePos] = useState({ x: 160, y: 200, vx: 0, vy: 0, angle: 0, va: 0 });
+  const [throwResult, setThrowResult] = useState(null);
+  const svgRef = useRef(null);
+  const dragRef = useRef(null);
+  const animRef = useRef(null);
+  const rollIntervalRef = useRef(null);
 
-  const handleResult = (idx, total) => {
-    setResults(prev => {
-      const next = { ...prev, [idx]: total };
-      if (Object.keys(next).length === n) setDone(true);
-      return next;
-    });
+  const AREA_W = 320, AREA_H = 320;
+
+  const startThrow = (clientX, clientY) => {
+    if (phase !== "idle") return;
+    const rect = svgRef.current.getBoundingClientRect();
+    dragRef.current = { startX: clientX - rect.left, startY: clientY - rect.top, time: Date.now() };
+    setPhase("throwing");
+    setDicePos(p => ({ ...p, x: clientX - rect.left, y: clientY - rect.top }));
   };
 
-  const reset = () => { setResults({}); setDone(false); setKey(k => k + 1); };
+  const endThrow = (clientX, clientY) => {
+    if (phase !== "throwing" || !dragRef.current) return;
+    const rect = svgRef.current.getBoundingClientRect();
+    const ex = clientX - rect.left, ey = clientY - rect.top;
+    const dt = Math.max((Date.now() - dragRef.current.time) / 1000, 0.05);
+    const dx = ex - dragRef.current.startX, dy = ey - dragRef.current.startY;
+    const speed = Math.sqrt(dx*dx + dy*dy) / dt;
+    const vx = (dx / dt) * 0.035;
+    const vy = (dy / dt) * 0.035;
+    const va = (Math.random() - 0.5) * 12 * (speed / 200);
 
-  const maxVal = done ? Math.max(...Object.values(results)) : null;
-  const winners = done ? participants.filter((_, i) => results[i] === maxVal) : [];
+    setDicePos(p => ({ ...p, x: ex, y: ey, vx, vy, va }));
+    setPhase("rolling");
+    dragRef.current = null;
+
+    // Rolling animation
+    let tick = 0;
+    const maxTicks = Math.floor(18 + speed / 25);
+    rollIntervalRef.current = setInterval(() => {
+      setDiceVal(Math.floor(Math.random() * 6) + 1);
+      tick++;
+      if (tick >= maxTicks) {
+        clearInterval(rollIntervalRef.current);
+        const final = Math.floor(Math.random() * 6) + 1;
+        setDiceVal(final);
+        setThrowResult(final);
+      }
+    }, Math.max(35, 100 - speed / 8));
+  };
+
+  // Physics bounce
+  useEffect(() => {
+    if (phase !== "rolling") return;
+    const loop = () => {
+      setDicePos(p => {
+        let { x, y, vx, vy, va, angle } = p;
+        vx *= 0.92; vy *= 0.92; va *= 0.88;
+        x += vx; y += vy; angle += va;
+        if (x < 40) { x = 40; vx = Math.abs(vx) * 0.7; }
+        if (x > AREA_W - 40) { x = AREA_W - 40; vx = -Math.abs(vx) * 0.7; }
+        if (y < 40) { y = 40; vy = Math.abs(vy) * 0.7; }
+        if (y > AREA_H - 40) { y = AREA_H - 40; vy = -Math.abs(vy) * 0.7; }
+        return { x, y, vx, vy, angle, va };
+      });
+      animRef.current = requestAnimationFrame(loop);
+    };
+    animRef.current = requestAnimationFrame(loop);
+    return () => cancelAnimationFrame(animRef.current);
+  }, [phase]);
+
+  // Stop when result confirmed
+  useEffect(() => {
+    if (throwResult !== null) {
+      setTimeout(() => {
+        cancelAnimationFrame(animRef.current);
+        const name = participants[currentIdx];
+        const color = COLORS[currentIdx % COLORS.length];
+        const newResults = [...results, { name, score: throwResult, color }];
+        setResults(newResults);
+        setThrowResult(null);
+        setPhase("idle");
+        setDicePos({ x: 160, y: 200, vx: 0, vy: 0, angle: 0, va: 0 });
+        setDiceVal(6);
+        if (currentIdx + 1 >= n) {
+          setPhase("done");
+        } else {
+          setCurrentIdx(currentIdx + 1);
+        }
+      }, 800);
+    }
+  }, [throwResult]);
+
+  const reset = () => {
+    setCurrentIdx(0); setResults([]); setPhase("idle"); setThrowResult(null);
+    setDicePos({ x: 160, y: 200, vx: 0, vy: 0, angle: 0, va: 0 }); setDiceVal(6);
+    cancelAnimationFrame(animRef.current); clearInterval(rollIntervalRef.current);
+  };
+
+  const maxScore = results.length > 0 ? Math.max(...results.map(r => r.score)) : 0;
+  const winners = results.filter(r => r.score === maxScore);
+  const currentColor = COLORS[currentIdx % COLORS.length];
+
+  const handleMouseDown = (e) => startThrow(e.clientX, e.clientY);
+  const handleMouseUp = (e) => endThrow(e.clientX, e.clientY);
+  const handleTouchStart = (e) => { e.preventDefault(); startThrow(e.touches[0].clientX, e.touches[0].clientY); };
+  const handleTouchEnd = (e) => { e.preventDefault(); endThrow(e.changedTouches[0].clientX, e.changedTouches[0].clientY); };
 
   return (
     <GameLayout bet={bet} onBack={onBack} onHome={onHome}>
-      <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-        <div style={{ fontSize: 13, color: "#888", textAlign: "center", marginBottom: 4 }}>꾹 누른 후 드래그 방향과 시간이 강도에 영향을 줘요!</div>
-        {participants.map((name, i) => (
-          <DiceThrow key={`${key}-${i}`} playerName={name} playerIdx={i} color={COLORS[i % COLORS.length]} onResult={(total) => handleResult(i, total)} />
-        ))}
+      <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 14 }}>
 
-        {done && (
-          <div style={{ textAlign: "center", background: "rgba(234,179,8,0.15)", border: "1px solid rgba(234,179,8,0.4)", borderRadius: 18, padding: "16px", animation: "popIn 0.4s cubic-bezier(0.34,1.56,0.64,1)", marginTop: 4 }}>
-            <div style={{ fontSize: 28, marginBottom: 6 }}>{winners.length > 1 ? "🤝" : "🏆"}</div>
-            <div style={{ fontSize: 22, fontWeight: 900, color: "#fbbf24" }}>{winners.join(", ")}</div>
-            <div style={{ fontSize: 13, color: "#aaa", marginTop: 4 }}>{winners.length > 1 ? "동점! 다시 던져요" : `${maxVal}점으로 승리!`}</div>
+        {phase !== "done" && (
+          <>
+            {/* 순서 표시 */}
+            <div style={{ display: "flex", gap: 6, justifyContent: "center", flexWrap: "wrap" }}>
+              {participants.map((name, i) => (
+                <div key={i} style={{ background: i < results.length ? `${COLORS[i%COLORS.length]}33` : i === currentIdx ? `${COLORS[i%COLORS.length]}55` : "rgba(255,255,255,0.06)", border: i === currentIdx ? `1.5px solid ${COLORS[i%COLORS.length]}` : "1px solid rgba(255,255,255,0.1)", borderRadius: 10, padding: "5px 10px", fontSize: 12, fontWeight: 700, color: i === currentIdx ? COLORS[i%COLORS.length] : i < results.length ? "#555" : "#666", transition: "all 0.2s" }}>
+                  {name}{i < results.length ? ` ${results[i].score}` : ""}
+                </div>
+              ))}
+            </div>
+
+            <div style={{ fontSize: 14, color: currentColor, fontWeight: 700, textAlign: "center" }}>
+              {phase === "rolling" || throwResult !== null ? "🎲 구르는 중..." : `${participants[currentIdx]} 차례 — 드래그해서 던지세요!`}
+            </div>
+
+            {/* Throw area */}
+            <svg ref={svgRef} width={AREA_W} height={AREA_H}
+              style={{ background: "rgba(255,255,255,0.03)", borderRadius: 20, border: `1.5px dashed ${currentColor}44`, cursor: phase === "idle" ? "grab" : "default", touchAction: "none", userSelect: "none" }}
+              onMouseDown={handleMouseDown} onMouseUp={handleMouseUp}
+              onTouchStart={handleTouchStart} onTouchEnd={handleTouchEnd}>
+
+              {/* Grid lines subtle */}
+              <line x1={AREA_W/2} y1={0} x2={AREA_W/2} y2={AREA_H} stroke="rgba(255,255,255,0.04)" strokeWidth={1} />
+              <line x1={0} y1={AREA_H/2} x2={AREA_W} y2={AREA_H/2} stroke="rgba(255,255,255,0.04)" strokeWidth={1} />
+
+              {phase === "idle" && (
+                <text x={AREA_W/2} y={AREA_H/2 + 5} textAnchor="middle" fill="rgba(255,255,255,0.2)" fontSize={13} fontFamily="'Pretendard',sans-serif">여기서 드래그!</text>
+              )}
+
+              <DiceCanvas value={diceVal} color={currentColor} x={dicePos.x} y={dicePos.y} angle={dicePos.angle} size={80} />
+            </svg>
+          </>
+        )}
+
+        {/* Results */}
+        {results.length > 0 && (
+          <div style={{ width: "100%", display: "flex", flexDirection: "column", gap: 6 }}>
+            {results.map((r, i) => (
+              <div key={i} style={{ display: "flex", alignItems: "center", gap: 10, background: `${r.color}18`, border: `1px solid ${r.color}44`, borderRadius: 12, padding: "8px 14px" }}>
+                <span style={{ fontWeight: 700, color: r.color, flex: 1 }}>{r.name}</span>
+                <span style={{ fontSize: 20, fontWeight: 900, color: r.color }}>{r.score}</span>
+                {phase === "done" && r.score === maxScore && <span style={{ fontSize: 14 }}>🏆</span>}
+              </div>
+            ))}
           </div>
         )}
 
-        <button onClick={reset} style={{ background: "rgba(255,255,255,0.07)", border: "1px solid rgba(255,255,255,0.12)", borderRadius: 16, padding: "13px", color: "#ccc", fontSize: 14, fontWeight: 700, cursor: "pointer", marginTop: 4 }}>
+        {phase === "done" && (
+          <div style={{ textAlign: "center", background: "rgba(234,179,8,0.15)", border: "1px solid rgba(234,179,8,0.4)", borderRadius: 18, padding: "16px", width: "100%", animation: "popIn 0.4s ease" }}>
+            <div style={{ fontSize: 28, marginBottom: 6 }}>{winners.length > 1 ? "🤝" : "🏆"}</div>
+            <div style={{ fontSize: 22, fontWeight: 900, color: "#fbbf24" }}>{winners.map(w=>w.name).join(", ")}</div>
+            <div style={{ fontSize: 13, color: "#aaa", marginTop: 4 }}>{winners.length > 1 ? "동점! 다시 던져요" : `${maxScore}점으로 승리!`}</div>
+          </div>
+        )}
+
+        <button onClick={reset} style={{ background: "rgba(255,255,255,0.07)", border: "1px solid rgba(255,255,255,0.12)", borderRadius: 16, padding: "13px 32px", color: "#ccc", fontSize: 14, fontWeight: 700, cursor: "pointer" }}>
           🔄 다시 하기
         </button>
       </div>
@@ -157,18 +203,15 @@ function GameLayout({ bet, onBack, onHome, children }) {
   return (
     <div style={{ padding: "24px 20px 0" }}>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
-        <button onClick={onBack} style={{ background: "none", border: "none", color: "#777", fontSize: 14, cursor: "pointer", display: "flex", alignItems: "center", gap: 4, padding: 0 }}>← 참가자 변경</button>
+        <button onClick={onBack} style={{ background: "none", border: "none", color: "#777", fontSize: 14, cursor: "pointer", padding: 0 }}>← 참가자 변경</button>
         <button onClick={onHome} style={{ background: "rgba(255,255,255,0.07)", border: "none", borderRadius: 10, padding: "6px 12px", color: "#aaa", fontSize: 13, cursor: "pointer" }}>🏠 홈</button>
       </div>
       <div style={{ textAlign: "center", marginBottom: 16 }}>
         <div style={{ fontSize: 32, marginBottom: 4 }}>{bet.emoji}</div>
-        <div style={{ fontSize: 20, fontWeight: 900 }}>{bet.title}</div>
+        <div style={{ fontSize: 20, fontWeight: 900 }}>주사위 던지기</div>
       </div>
       {children}
-      <style>{`
-        @keyframes popIn { from { transform: scale(0.7); opacity: 0; } to { transform: scale(1); opacity: 1; } }
-        @keyframes shake { 0%,100% { transform: rotate(-5deg); } 50% { transform: rotate(5deg); } }
-      `}</style>
+      <style>{`@keyframes popIn{from{transform:scale(0.7);opacity:0}to{transform:scale(1);opacity:1}}`}</style>
     </div>
   );
 }

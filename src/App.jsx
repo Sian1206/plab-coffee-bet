@@ -16,13 +16,14 @@ const BETS = [
 const CATEGORIES = ["전체", "뽑기", "사다리", "카드", "주사위"];
 const GAME_COMPONENTS = { roulette: RouletteGame, marble: MarbleGame, ladder: LadderGame, card: CardGame, dice: DiceGame };
 
-const ALL_MEMBERS = [
-  "시안","호두","라크","정남","루니","번즈","쿠스","키커","아쿠","뿌까",
-  "제리","맥국","후크","뮤츠","뚜비","옐로","따오","릴라","뉴진","라미",
-  "비버","미누","로쿤","소피아","아키","준타","무민","아이언","준리","페페",
-  "펑키","히로","야무치","솔트","쵸비","테디","머시","터키","티모시","피르",
-  "상떼","워즈","피치","큐","라임","스톤","엔도"
-];
+const ALL_MEMBERS = (() => {
+  const rest = ["호두","라크","정남","루니","번즈","쿠스","키커","아쿠","뿌까",
+    "제리","맥국","후크","뮤츠","뚜비","옐로","따오","릴라","뉴진","라미",
+    "비버","미누","로쿤","소피아","아키","준타","무민","아이언","준리","페페",
+    "펑키","히로","야무치","솔트","쵸비","테디","머시","터키","티모시","피르",
+    "상떼","워즈","피치","큐","라임","스톤","엔도"].sort((a,b) => a.localeCompare(b,'ko'));
+  return ["시안", ...rest];
+})();
 
 export default function App() {
   const [screen, setScreen] = useState("home");
@@ -66,8 +67,7 @@ export default function App() {
           <>
             <div style={{ padding: "28px 20px 0", display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
               <div>
-                <div style={{ fontSize: 11, letterSpacing: "0.22em", color: "#8b5cf6", fontWeight: 700, textTransform: "uppercase", marginBottom: 5 }}>PLABFOOTBALL COFFEE BET</div>
-                <div style={{ fontSize: 24, fontWeight: 900, lineHeight: 1.2, letterSpacing: "-0.02em" }}>☕ 커피 한잔<br />해야죠</div>
+                <div style={{ fontSize: 24, fontWeight: 900, lineHeight: 1.2, letterSpacing: "-0.02em" }}>☕ PLAB 커피 내기</div>
               </div>
               <button onClick={pickRandom} style={{ background: "linear-gradient(135deg,#f97316,#ef4444)", border: "none", borderRadius: 14, padding: "10px 15px", color: "#fff", fontSize: 13, fontWeight: 700, cursor: "pointer", display: "flex", alignItems: "center", gap: 6, boxShadow: "0 4px 18px rgba(249,115,22,0.45)", whiteSpace: "nowrap", transition: "transform 0.12s" }}
                 onMouseDown={e => e.currentTarget.style.transform = "scale(0.93)"} onMouseUp={e => e.currentTarget.style.transform = "scale(1)"}>
@@ -83,6 +83,9 @@ export default function App() {
               {filteredBets.map((bet, i) => (
                 <BetCard key={bet.id} bet={bet} onClick={() => handleSelectBet(bet)} delay={i * 55} highlighted={highlightedId === bet.id} cardRef={el => { cardRefs.current[bet.id] = el; }} />
               ))}
+            </div>
+            <div style={{ textAlign: "center", padding: "32px 0 8px", fontSize: 12, color: "#333", letterSpacing: "0.05em" }}>
+              made by 시안
             </div>
           </>
         )}
@@ -138,8 +141,8 @@ export default function App() {
               <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
                 {filteredMembers.map(name => (
                   <div key={name} onClick={() => toggleParticipant(name)}
-                    style={{ background: participants.includes(name) ? "linear-gradient(135deg,#8b5cf6,#6366f1)" : "rgba(255,255,255,0.08)", border: participants.includes(name) ? "none" : "1px solid rgba(255,255,255,0.12)", borderRadius: 12, padding: "8px 14px", fontSize: 14, fontWeight: 600, cursor: "pointer", transition: "all 0.18s", userSelect: "none", color: participants.includes(name) ? "#fff" : "#ccc" }}>
-                    {participants.includes(name) ? "✓ " : ""}{name}
+                    style={{ background: participants.includes(name) ? "linear-gradient(135deg,#8b5cf6,#6366f1)" : "rgba(255,255,255,0.08)", border: participants.includes(name) ? "none" : "1px solid rgba(255,255,255,0.12)", borderRadius: 12, width: 64, height: 40, fontSize: 13, fontWeight: 600, cursor: "pointer", transition: "all 0.18s", userSelect: "none", color: participants.includes(name) ? "#fff" : "#ccc", display: "flex", alignItems: "center", justifyContent: "center", textAlign: "center", flexShrink: 0 }}>
+                    {participants.includes(name) ? "✓" : ""}{name}
                   </div>
                 ))}
               </div>
@@ -159,7 +162,7 @@ export default function App() {
       {screen === "home" && (
         <button onClick={() => setShowReport(true)} style={{ position: "fixed", bottom: 28, right: 24, background: "linear-gradient(135deg,#1e1e2e,#16213e)", border: "1px solid rgba(139,92,246,0.45)", borderRadius: 50, padding: "13px 20px", color: "#c4b5fd", fontSize: 14, fontWeight: 700, cursor: "pointer", display: "flex", alignItems: "center", gap: 7, boxShadow: "0 6px 28px rgba(0,0,0,0.5)", zIndex: 50, transition: "transform 0.15s" }}
           onMouseEnter={e => e.currentTarget.style.transform = "translateY(-2px)"} onMouseLeave={e => e.currentTarget.style.transform = "translateY(0)"}>
-          💡 내기 제보하기
+          💡 내기 제안하기
         </button>
       )}
 
@@ -175,7 +178,7 @@ export default function App() {
             ) : (
               <>
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 22 }}>
-                  <div><div style={{ fontWeight: 900, fontSize: 20 }}>💡 내기 제보하기</div><div style={{ fontSize: 13, color: "#888", marginTop: 3 }}>새로운 내기 아이디어를 알려주세요!</div></div>
+                  <div><div style={{ fontWeight: 900, fontSize: 20 }}>💡 내기 제안하기</div><div style={{ fontSize: 13, color: "#888", marginTop: 3 }}>새로운 내기 아이디어를 알려주세요!</div></div>
                   <button onClick={() => setShowReport(false)} style={{ background: "rgba(255,255,255,0.08)", border: "none", borderRadius: 10, width: 34, height: 34, color: "#aaa", fontSize: 18, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}>×</button>
                 </div>
                 <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
