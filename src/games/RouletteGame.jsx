@@ -6,10 +6,8 @@ export default function RouletteGame({ participants, bet, onBack, onHome }) {
   const canvasRef = useRef(null);
   const [spinning, setSpinning] = useState(false);
   const [winner, setWinner] = useState(null);
-  const [rotation, setRotation] = useState(0);
-  const animRef = useRef(null);
   const rotRef = useRef(0);
-
+  const animRef = useRef(null);
   const n = participants.length;
   const sliceAngle = (2 * Math.PI) / n;
 
@@ -19,40 +17,29 @@ export default function RouletteGame({ participants, bet, onBack, onHome }) {
     const ctx = canvas.getContext("2d");
     const cx = canvas.width / 2, cy = canvas.height / 2, r = cx - 8;
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-    // shadow
     ctx.save();
     ctx.shadowColor = "rgba(0,0,0,0.5)";
     ctx.shadowBlur = 20;
-    ctx.beginPath(); ctx.arc(cx, cy, r, 0, 2 * Math.PI); ctx.fillStyle = "#111"; ctx.fill();
+    ctx.beginPath(); ctx.arc(cx, cy, r, 0, 2 * Math.PI);
+    ctx.fillStyle = "#111"; ctx.fill();
     ctx.restore();
-
     for (let i = 0; i < n; i++) {
       const start = rot + i * sliceAngle;
       const end = start + sliceAngle;
-      ctx.beginPath();
-      ctx.moveTo(cx, cy);
-      ctx.arc(cx, cy, r, start, end);
-      ctx.closePath();
-      ctx.fillStyle = COLORS[i % COLORS.length];
-      ctx.fill();
-      ctx.strokeStyle = "#0d0d1a";
-      ctx.lineWidth = 2;
-      ctx.stroke();
-
+      ctx.beginPath(); ctx.moveTo(cx, cy);
+      ctx.arc(cx, cy, r, start, end); ctx.closePath();
+      ctx.fillStyle = COLORS[i % COLORS.length]; ctx.fill();
+      ctx.strokeStyle = "#0d0d1a"; ctx.lineWidth = 2; ctx.stroke();
       ctx.save();
       ctx.translate(cx, cy);
       ctx.rotate(start + sliceAngle / 2);
       ctx.textAlign = "right";
       ctx.fillStyle = "#fff";
       ctx.font = `bold ${n > 6 ? 11 : 14}px 'Pretendard','Apple SD Gothic Neo',sans-serif`;
-      ctx.shadowColor = "rgba(0,0,0,0.6)";
-      ctx.shadowBlur = 4;
+      ctx.shadowColor = "rgba(0,0,0,0.6)"; ctx.shadowBlur = 4;
       ctx.fillText(participants[i], r - 12, 5);
       ctx.restore();
     }
-
-    // center circle
     ctx.beginPath(); ctx.arc(cx, cy, 18, 0, 2 * Math.PI);
     ctx.fillStyle = "#0d0d1a"; ctx.fill();
     ctx.strokeStyle = "#fff3"; ctx.lineWidth = 2; ctx.stroke();
@@ -64,19 +51,29 @@ export default function RouletteGame({ participants, bet, onBack, onHome }) {
     if (spinning) return;
     setSpinning(true);
     setWinner(null);
-    const totalRot = (Math.random() * 6 + 8) * 2 * Math.PI;
-    const duration = 4000;
+
+    // 쫄깃한 속도: 빠르게 가속 → 오래 고속 유지 → 아주 천천히 감속
+    const totalRot = (Math.random() * 5 + 10) * 2 * Math.PI;
+    const duration = 7000; // 7초로 늘림
     const start = performance.now();
     const startRot = rotRef.current;
+
+    const easeInOutCustom = (t) => {
+      // 앞 20%: 빠르게 가속, 중간 50%: 고속 유지, 뒤 30%: 매우 천천히 감속
+      if (t < 0.2) return (t / 0.2) * (t / 0.2) * 0.4;
+      if (t < 0.7) return 0.4 + (t - 0.2) / 0.5 * 0.45;
+      // 마지막 30%: cubic ease-out으로 쫄깃하게
+      const r = (t - 0.7) / 0.3;
+      return 0.85 + (1 - Math.pow(1 - r, 3)) * 0.15;
+    };
 
     const animate = (now) => {
       const elapsed = now - start;
       const t = Math.min(elapsed / duration, 1);
-      const ease = 1 - Math.pow(1 - t, 4);
+      const ease = easeInOutCustom(t);
       const cur = startRot + totalRot * ease;
       rotRef.current = cur;
       drawWheel(cur);
-
       if (t < 1) {
         animRef.current = requestAnimationFrame(animate);
       } else {
@@ -95,18 +92,15 @@ export default function RouletteGame({ participants, bet, onBack, onHome }) {
       <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 20 }}>
         <div style={{ position: "relative", display: "inline-block" }}>
           <canvas ref={canvasRef} width={300} height={300} style={{ display: "block", borderRadius: "50%" }} />
-          {/* Pointer */}
           <div style={{ position: "absolute", top: "50%", right: -6, transform: "translateY(-50%)", width: 0, height: 0, borderTop: "12px solid transparent", borderBottom: "12px solid transparent", borderRight: "24px solid #fff", filter: "drop-shadow(0 2px 4px rgba(0,0,0,0.5))" }} />
         </div>
-
         {winner && (
           <div style={{ textAlign: "center", animation: "popIn 0.4s cubic-bezier(0.34,1.56,0.64,1)" }}>
-            <div style={{ fontSize: 36, marginBottom: 6 }}>🎉</div>
-            <div style={{ fontSize: 26, fontWeight: 900, color: "#fff" }}>{winner}</div>
-            <div style={{ fontSize: 14, color: "#aaa", marginTop: 4 }}>당첨!</div>
+            <div style={{ fontSize: 36, marginBottom: 6 }}>☕</div>
+            <div style={{ fontSize: 26, fontWeight: 900 }}>{winner}</div>
+            <div style={{ fontSize: 14, color: "#aaa", marginTop: 4 }}>커피 한 잔 쏘세요!</div>
           </div>
         )}
-
         <button onClick={spin} disabled={spinning} style={{ background: spinning ? "rgba(255,255,255,0.08)" : "linear-gradient(135deg,#f97316,#ef4444)", border: "none", borderRadius: 18, padding: "16px 48px", color: spinning ? "#555" : "#fff", fontSize: 18, fontWeight: 800, cursor: spinning ? "not-allowed" : "pointer", boxShadow: spinning ? "none" : "0 6px 24px rgba(249,115,22,0.5)", transition: "all 0.3s" }}>
           {spinning ? "돌아가는 중..." : winner ? "다시 돌리기" : "🎡 룰렛 돌리기"}
         </button>
@@ -127,6 +121,7 @@ function GameLayout({ bet, onBack, onHome, children }) {
         <div style={{ fontSize: 20, fontWeight: 900 }}>{bet.title}</div>
       </div>
       {children}
+      <style>{`@keyframes popIn { from { transform: scale(0.7); opacity: 0; } to { transform: scale(1); opacity: 1; } }`}</style>
     </div>
   );
 }

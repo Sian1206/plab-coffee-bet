@@ -4,34 +4,32 @@ import MarbleGame from "./games/MarbleGame";
 import LadderGame from "./games/LadderGame";
 import CardGame from "./games/CardGame";
 import DiceGame from "./games/DiceGame";
-import RpsGame from "./games/RpsGame";
-import NumberGame from "./games/NumberGame";
-import BottleGame from "./games/BottleGame";
 
 const BETS = [
   { id: 1, emoji: "🎡", title: "룰렛 돌리기", description: "참가자 이름을 넣고 룰렛을 돌려 한 명을 뽑아요.", recommendedCount: "2~10명", winnerCount: "1명", category: "뽑기", color: "#f97316", tag: "인기", game: "roulette" },
-  { id: 2, emoji: "🎰", title: "마블 룰렛", description: "구슬이 튀어 랜덤 번호에 꽂히는 마블 방식으로 승자를 결정해요.", recommendedCount: "2~8명", winnerCount: "1명", category: "뽑기", color: "#8b5cf6", tag: "신규", game: "marble" },
-  { id: 3, emoji: "🪜", title: "사다리 타기", description: "클래식 사다리 게임! 각자 줄을 고르고 결과를 확인하세요.", recommendedCount: "2~8명", winnerCount: "결과에 따라", category: "사다리", color: "#22c55e", tag: null, game: "ladder" },
-  { id: 4, emoji: "🃏", title: "카드 뒤집기", description: "뒤집어진 카드 중 특정 카드를 고른 사람이 당첨(혹은 꼴찌)!", recommendedCount: "2~6명", winnerCount: "1명", category: "카드", color: "#ec4899", tag: null, game: "card" },
-  { id: 5, emoji: "🎲", title: "주사위 대결", description: "모두가 주사위를 굴려 가장 높은 숫자가 나온 사람이 승리!", recommendedCount: "2~6명", winnerCount: "최고점 1명", category: "주사위", color: "#eab308", tag: null, game: "dice" },
-  { id: 6, emoji: "✂️", title: "가위바위보 토너먼트", description: "토너먼트 방식으로 진행되는 팀 가위바위보. 최후의 1인을 가려요.", recommendedCount: "4~16명", winnerCount: "최종 1명", category: "대결", color: "#14b8a6", tag: null, game: "rps" },
-  { id: 7, emoji: "🔢", title: "숫자 추첨", description: "범위 내 숫자를 각자 고른 뒤, 랜덤 숫자와 가장 가까운 사람이 당첨!", recommendedCount: "2~20명", winnerCount: "최근접 1명", category: "추첨", color: "#60a5fa", tag: null, game: "number" },
-  { id: 8, emoji: "🫵", title: "지목 돌리기", description: "병을 돌려 멈춘 방향에 있는 사람이 미션 수행!", recommendedCount: "3~10명", winnerCount: "지목된 1명", category: "대결", color: "#f43f5e", tag: null, game: "bottle" },
+  { id: 2, emoji: "🎰", title: "마블 룰렛", description: "각자의 구슬이 핀을 튕기며 떨어져요. 가장 먼저 or 마지막으로 떨어진 구슬 주인이 커피를!", recommendedCount: "2~8명", winnerCount: "1명", category: "뽑기", color: "#8b5cf6", tag: "신규", game: "marble" },
+  { id: 3, emoji: "🪜", title: "사다리 타기", description: "사다리를 타고 내려가 💰를 피하세요! 돈 걸린 사람이 커피 한 잔 쏩니다.", recommendedCount: "2~8명", winnerCount: "꼴찌 1명", category: "사다리", color: "#22c55e", tag: null, game: "ladder" },
+  { id: 4, emoji: "🃏", title: "카드 뒤집기", description: "뒤집힌 카드 중 단 하나의 💣 카드를 고른 사람이 커피를 쏩니다!", recommendedCount: "2~6명", winnerCount: "꼴찌 1명", category: "카드", color: "#ec4899", tag: null, game: "card" },
+  { id: 5, emoji: "🎲", title: "주사위 대결", description: "드래그로 주사위 두 개를 던져요! 합산 최고점자가 승리!", recommendedCount: "2~6명", winnerCount: "최고점 1명", category: "주사위", color: "#eab308", tag: null, game: "dice" },
 ];
 
-const CATEGORIES = ["전체", "뽑기", "사다리", "카드", "주사위", "대결", "추첨"];
+const CATEGORIES = ["전체", "뽑기", "사다리", "카드", "주사위"];
+const GAME_COMPONENTS = { roulette: RouletteGame, marble: MarbleGame, ladder: LadderGame, card: CardGame, dice: DiceGame };
 
-const GAME_COMPONENTS = { roulette: RouletteGame, marble: MarbleGame, ladder: LadderGame, card: CardGame, dice: DiceGame, rps: RpsGame, number: NumberGame, bottle: BottleGame };
+const ALL_MEMBERS = [
+  "시안","호두","라크","정남","루니","번즈","쿠스","키커","아쿠","뿌까",
+  "제리","맥국","후크","뮤츠","뚜비","옐로","따오","릴라","뉴진","라미",
+  "비버","미누","로쿤","소피아","아키","준타","무민","아이언","준리","페페",
+  "펑키","히로","야무치","솔트","쵸비","테디","머시","터키","티모시","피르",
+  "상떼","워즈","피치","큐","라임","스톤","엔도"
+];
 
 export default function App() {
   const [screen, setScreen] = useState("home");
   const [selectedBet, setSelectedBet] = useState(null);
-  const [savedMembers, setSavedMembers] = useState(["김민준", "이서연", "박지호", "최유나", "정태양"]);
   const [participants, setParticipants] = useState([]);
-  const [newMemberName, setNewMemberName] = useState("");
-  const [tempNewName, setTempNewName] = useState("");
   const [filterCategory, setFilterCategory] = useState("전체");
-  const [deletingMember, setDeletingMember] = useState(null);
+  const [searchQuery, setSearchQuery] = useState("");
   const [highlightedId, setHighlightedId] = useState(null);
   const [showReport, setShowReport] = useState(false);
   const [reportForm, setReportForm] = useState({ name: "", title: "", desc: "" });
@@ -49,12 +47,11 @@ export default function App() {
     setTimeout(() => setHighlightedId(null), 2800);
   };
 
-  const handleSelectBet = (bet) => { setSelectedBet(bet); setParticipants([]); setScreen("select-participants"); };
+  const handleSelectBet = (bet) => { setSelectedBet(bet); setParticipants([]); setSearchQuery(""); setScreen("select-participants"); };
   const toggleParticipant = (name) => setParticipants(prev => prev.includes(name) ? prev.filter(n => n !== name) : [...prev, name]);
-  const addTempMember = () => { const n = tempNewName.trim(); if (!n) return; if (!participants.includes(n)) setParticipants(p => [...p, n]); setTempNewName(""); };
-  const saveMember = () => { const n = newMemberName.trim(); if (!n || savedMembers.includes(n)) return; setSavedMembers(p => [...p, n]); setNewMemberName(""); };
-  const removeSavedMember = (name) => { setSavedMembers(p => p.filter(n => n !== name)); setParticipants(p => p.filter(n => n !== name)); setDeletingMember(null); };
+  const removeParticipant = (name) => setParticipants(prev => prev.filter(n => n !== name));
   const submitReport = () => { if (!reportForm.title.trim()) return; setReportSent(true); setTimeout(() => { setReportSent(false); setShowReport(false); setReportForm({ name: "", title: "", desc: "" }); }, 2200); };
+  const filteredMembers = searchQuery.trim() ? ALL_MEMBERS.filter(m => m.includes(searchQuery.trim())) : ALL_MEMBERS;
 
   const GameComponent = selectedBet ? GAME_COMPONENTS[selectedBet.game] : null;
 
@@ -65,28 +62,23 @@ export default function App() {
 
       <div style={{ maxWidth: 480, margin: "0 auto", padding: "0 0 110px" }}>
 
-        {/* HOME */}
         {screen === "home" && (
           <>
             <div style={{ padding: "28px 20px 0", display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
               <div>
-                <div style={{ fontSize: 11, letterSpacing: "0.22em", color: "#8b5cf6", fontWeight: 700, textTransform: "uppercase", marginBottom: 5 }}>COMPANY BET</div>
-                <div style={{ fontSize: 27, fontWeight: 900, lineHeight: 1.2, letterSpacing: "-0.02em" }}>우리끼리<br />내기 🎲</div>
+                <div style={{ fontSize: 11, letterSpacing: "0.22em", color: "#8b5cf6", fontWeight: 700, textTransform: "uppercase", marginBottom: 5 }}>PLABFOOTBALL COFFEE BET</div>
+                <div style={{ fontSize: 24, fontWeight: 900, lineHeight: 1.2, letterSpacing: "-0.02em" }}>☕ 커피 한잔<br />해야죠</div>
               </div>
               <button onClick={pickRandom} style={{ background: "linear-gradient(135deg,#f97316,#ef4444)", border: "none", borderRadius: 14, padding: "10px 15px", color: "#fff", fontSize: 13, fontWeight: 700, cursor: "pointer", display: "flex", alignItems: "center", gap: 6, boxShadow: "0 4px 18px rgba(249,115,22,0.45)", whiteSpace: "nowrap", transition: "transform 0.12s" }}
                 onMouseDown={e => e.currentTarget.style.transform = "scale(0.93)"} onMouseUp={e => e.currentTarget.style.transform = "scale(1)"}>
                 🎯 랜덤 추천
               </button>
             </div>
-
             <div style={{ padding: "18px 20px 0", display: "flex", gap: 7, overflowX: "auto", scrollbarWidth: "none" }}>
               {CATEGORIES.map(cat => (
-                <button key={cat} onClick={() => setFilterCategory(cat)} style={{ background: filterCategory === cat ? "linear-gradient(135deg,#8b5cf6,#6366f1)" : "rgba(255,255,255,0.06)", border: filterCategory === cat ? "none" : "1px solid rgba(255,255,255,0.1)", borderRadius: 20, padding: "7px 14px", color: filterCategory === cat ? "#fff" : "#999", fontSize: 13, fontWeight: filterCategory === cat ? 700 : 500, cursor: "pointer", whiteSpace: "nowrap", transition: "all 0.18s" }}>
-                  {cat}
-                </button>
+                <button key={cat} onClick={() => setFilterCategory(cat)} style={{ background: filterCategory === cat ? "linear-gradient(135deg,#8b5cf6,#6366f1)" : "rgba(255,255,255,0.06)", border: filterCategory === cat ? "none" : "1px solid rgba(255,255,255,0.1)", borderRadius: 20, padding: "7px 14px", color: filterCategory === cat ? "#fff" : "#999", fontSize: 13, fontWeight: filterCategory === cat ? 700 : 500, cursor: "pointer", whiteSpace: "nowrap", transition: "all 0.18s" }}>{cat}</button>
               ))}
             </div>
-
             <div style={{ padding: "14px 20px 0", display: "flex", flexDirection: "column", gap: 13 }}>
               {filteredBets.map((bet, i) => (
                 <BetCard key={bet.id} bet={bet} onClick={() => handleSelectBet(bet)} delay={i * 55} highlighted={highlightedId === bet.id} cardRef={el => { cardRefs.current[bet.id] = el; }} />
@@ -95,11 +87,9 @@ export default function App() {
           </>
         )}
 
-        {/* SELECT PARTICIPANTS */}
         {screen === "select-participants" && selectedBet && (
           <div style={{ padding: "24px 20px 0" }}>
             <button onClick={() => setScreen("home")} style={{ background: "none", border: "none", color: "#777", fontSize: 14, cursor: "pointer", display: "flex", alignItems: "center", gap: 4, marginBottom: 18, padding: 0 }}>← 목록으로</button>
-
             <div style={{ background: `linear-gradient(135deg,${selectedBet.color}1e,${selectedBet.color}0d)`, border: `1px solid ${selectedBet.color}44`, borderRadius: 22, padding: "18px 20px", marginBottom: 22, display: "flex", gap: 14, alignItems: "center" }}>
               <div style={{ fontSize: 38 }}>{selectedBet.emoji}</div>
               <div>
@@ -112,78 +102,63 @@ export default function App() {
               </div>
             </div>
 
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
               <div style={{ fontWeight: 700, fontSize: 16 }}>참가자 선택</div>
-              <div style={{ background: participants.length > 0 ? "linear-gradient(135deg,#8b5cf6,#6366f1)" : "rgba(255,255,255,0.07)", borderRadius: 20, padding: "4px 13px", fontSize: 13, fontWeight: 700, transition: "all 0.3s" }}>{participants.length}명 선택됨</div>
-            </div>
-
-            {participants.length > 0 && (
-              <div style={{ display: "flex", flexWrap: "wrap", gap: 7, marginBottom: 14 }}>
-                {participants.map(name => (
-                  <div key={name} onClick={() => toggleParticipant(name)} style={{ background: "linear-gradient(135deg,#8b5cf6,#6366f1)", borderRadius: 20, padding: "6px 13px", fontSize: 13, fontWeight: 600, cursor: "pointer", display: "flex", alignItems: "center", gap: 6, animation: "popIn 0.2s ease" }}>
-                    {name} <span style={{ opacity: 0.75, fontSize: 15, lineHeight: 1 }}>×</span>
-                  </div>
-                ))}
-              </div>
-            )}
-
-            <div style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)", borderRadius: 20, padding: 16, marginBottom: 14 }}>
-              <div style={{ fontSize: 13, color: "#777", fontWeight: 600, marginBottom: 11 }}>저장된 팀원</div>
-              <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginBottom: 13 }}>
-                {savedMembers.map(name => (
-                  <div key={name} style={{ position: "relative" }}>
-                    <div onClick={() => deletingMember !== name && toggleParticipant(name)} style={{ background: participants.includes(name) ? "linear-gradient(135deg,#8b5cf6,#6366f1)" : "rgba(255,255,255,0.08)", border: participants.includes(name) ? "none" : "1px solid rgba(255,255,255,0.12)", borderRadius: 12, padding: "8px 34px 8px 12px", fontSize: 14, fontWeight: 600, cursor: "pointer", transition: "all 0.18s", userSelect: "none" }}>
-                      {participants.includes(name) ? "✓ " : ""}{name}
-                    </div>
-                    <button onClick={e => { e.stopPropagation(); setDeletingMember(deletingMember === name ? null : name); }} style={{ position: "absolute", right: 4, top: "50%", transform: "translateY(-50%)", background: deletingMember === name ? "#ef4444" : "rgba(255,255,255,0.1)", border: "none", borderRadius: 8, width: 24, height: 24, color: "#fff", fontSize: 13, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", transition: "all 0.18s", fontWeight: 800 }}>
-                      {deletingMember === name ? "✓" : "×"}
-                    </button>
-                    {deletingMember === name && (
-                      <div style={{ position: "absolute", top: "calc(100% + 6px)", left: 0, background: "#1a1a2e", border: "1px solid #ef4444", borderRadius: 12, padding: "10px 12px", fontSize: 12, zIndex: 20, whiteSpace: "nowrap", boxShadow: "0 8px 28px rgba(0,0,0,0.6)" }}>
-                        <div style={{ color: "#ccc", marginBottom: 8 }}>"{name}" 삭제할까요?</div>
-                        <div style={{ display: "flex", gap: 6 }}>
-                          <button onClick={() => removeSavedMember(name)} style={{ background: "#ef4444", border: "none", borderRadius: 8, padding: "5px 10px", color: "#fff", fontSize: 12, cursor: "pointer", fontWeight: 700 }}>삭제</button>
-                          <button onClick={() => setDeletingMember(null)} style={{ background: "rgba(255,255,255,0.1)", border: "none", borderRadius: 8, padding: "5px 10px", color: "#ccc", fontSize: 12, cursor: "pointer" }}>취소</button>
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                ))}
-              </div>
-              <div style={{ display: "flex", gap: 8 }}>
-                <input value={newMemberName} onChange={e => setNewMemberName(e.target.value)} onKeyDown={e => e.key === "Enter" && saveMember()} placeholder="이름 입력 후 저장..." style={{ flex: 1, background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.11)", borderRadius: 12, padding: "9px 13px", color: "#f0f0f0", fontSize: 13, outline: "none" }} />
-                <button onClick={saveMember} style={{ background: "rgba(99,102,241,0.28)", border: "1px solid rgba(99,102,241,0.38)", borderRadius: 12, padding: "9px 15px", color: "#a5b4fc", fontSize: 13, fontWeight: 700, cursor: "pointer" }}>저장</button>
+              <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+                {participants.length > 0 && (
+                  <button onClick={() => setParticipants([])} style={{ background: "rgba(239,68,68,0.15)", border: "1px solid rgba(239,68,68,0.3)", borderRadius: 12, padding: "4px 10px", color: "#f87171", fontSize: 12, fontWeight: 600, cursor: "pointer" }}>전체 해제</button>
+                )}
+                <div style={{ background: participants.length > 0 ? "linear-gradient(135deg,#8b5cf6,#6366f1)" : "rgba(255,255,255,0.07)", borderRadius: 20, padding: "4px 13px", fontSize: 13, fontWeight: 700, transition: "all 0.3s" }}>{participants.length}명</div>
               </div>
             </div>
 
+            {/* 선택된 참가자 칩 — 항상 공간 확보 */}
+            <div style={{ minHeight: 44, display: "flex", flexWrap: "wrap", gap: 7, marginBottom: 14, alignContent: "flex-start", padding: "2px 0" }}>
+              {participants.map(name => (
+                <div key={name} style={{ background: "linear-gradient(135deg,#8b5cf6,#6366f1)", borderRadius: 20, padding: "6px 10px 6px 13px", fontSize: 13, fontWeight: 600, display: "flex", alignItems: "center", gap: 6, animation: "popIn 0.2s ease" }}>
+                  {name}
+                  <span onClick={() => removeParticipant(name)} style={{ opacity: 0.7, fontSize: 16, lineHeight: 1, cursor: "pointer", padding: "0 2px" }}>×</span>
+                </div>
+              ))}
+            </div>
+
+            {/* 고정 팀원 목록 */}
             <div style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)", borderRadius: 20, padding: 16, marginBottom: 22 }}>
-              <div style={{ fontSize: 13, color: "#777", fontWeight: 600, marginBottom: 10 }}>이번 내기만 참여 (저장 안 함)</div>
-              <div style={{ display: "flex", gap: 8 }}>
-                <input value={tempNewName} onChange={e => setTempNewName(e.target.value)} onKeyDown={e => e.key === "Enter" && addTempMember()} placeholder="이름 입력..." style={{ flex: 1, background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.11)", borderRadius: 12, padding: "9px 13px", color: "#f0f0f0", fontSize: 13, outline: "none" }} />
-                <button onClick={addTempMember} style={{ background: "rgba(236,72,153,0.18)", border: "1px solid rgba(236,72,153,0.28)", borderRadius: 12, padding: "9px 15px", color: "#f9a8d4", fontSize: 13, fontWeight: 700, cursor: "pointer" }}>추가</button>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
+                <div style={{ fontSize: 13, color: "#777", fontWeight: 600 }}>
+                  플랩풋볼 팀원 <span style={{ color: "#555", fontWeight: 400 }}>({ALL_MEMBERS.length}명)</span>
+                </div>
+              </div>
+              <input
+                value={searchQuery}
+                onChange={e => setSearchQuery(e.target.value)}
+                placeholder="🔍 이름 검색..."
+                style={{ width: "100%", background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.11)", borderRadius: 12, padding: "9px 13px", color: "#f0f0f0", fontSize: 13, outline: "none", marginBottom: 12, boxSizing: "border-box" }}
+              />
+              <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+                {filteredMembers.map(name => (
+                  <div key={name} onClick={() => toggleParticipant(name)}
+                    style={{ background: participants.includes(name) ? "linear-gradient(135deg,#8b5cf6,#6366f1)" : "rgba(255,255,255,0.08)", border: participants.includes(name) ? "none" : "1px solid rgba(255,255,255,0.12)", borderRadius: 12, padding: "8px 14px", fontSize: 14, fontWeight: 600, cursor: "pointer", transition: "all 0.18s", userSelect: "none", color: participants.includes(name) ? "#fff" : "#ccc" }}>
+                    {participants.includes(name) ? "✓ " : ""}{name}
+                  </div>
+                ))}
               </div>
             </div>
 
-            <button disabled={participants.length < 2} onClick={() => setScreen("game")} style={{ width: "100%", background: participants.length >= 2 ? "linear-gradient(135deg,#8b5cf6,#6366f1)" : "rgba(255,255,255,0.05)", border: "none", borderRadius: 18, padding: "16px", color: participants.length >= 2 ? "#fff" : "#444", fontSize: 16, fontWeight: 800, cursor: participants.length >= 2 ? "pointer" : "not-allowed", boxShadow: participants.length >= 2 ? "0 6px 24px rgba(139,92,246,0.4)" : "none", transition: "all 0.3s", letterSpacing: "0.02em" }}>
-              {participants.length < 2 ? "2명 이상 선택하세요" : `🎲 ${participants.length}명으로 내기 시작!`}
+            <button disabled={participants.length < 2} onClick={() => setScreen("game")} style={{ width: "100%", background: participants.length >= 2 ? "linear-gradient(135deg,#8b5cf6,#6366f1)" : "rgba(255,255,255,0.05)", border: "none", borderRadius: 18, padding: "16px", color: participants.length >= 2 ? "#fff" : "#444", fontSize: 16, fontWeight: 800, cursor: participants.length >= 2 ? "pointer" : "not-allowed", boxShadow: participants.length >= 2 ? "0 6px 24px rgba(139,92,246,0.4)" : "none", transition: "all 0.3s" }}>
+              {participants.length < 2 ? "2명 이상 선택하세요" : `☕ ${participants.length}명으로 내기 시작!`}
             </button>
           </div>
         )}
 
-        {/* GAME */}
         {screen === "game" && selectedBet && GameComponent && (
-          <GameComponent
-            participants={participants}
-            bet={selectedBet}
-            onBack={() => setScreen("select-participants")}
-            onHome={() => setScreen("home")}
-          />
+          <GameComponent participants={participants} bet={selectedBet} onBack={() => setScreen("select-participants")} onHome={() => setScreen("home")} />
         )}
       </div>
 
       {screen === "home" && (
-        <button onClick={() => setShowReport(true)} style={{ position: "fixed", bottom: 28, right: 24, background: "linear-gradient(135deg,#1e1e2e,#16213e)", border: "1px solid rgba(139,92,246,0.45)", borderRadius: 50, padding: "13px 20px", color: "#c4b5fd", fontSize: 14, fontWeight: 700, cursor: "pointer", display: "flex", alignItems: "center", gap: 7, boxShadow: "0 6px 28px rgba(0,0,0,0.5),0 0 0 1px rgba(139,92,246,0.2)", zIndex: 50, transition: "transform 0.15s,box-shadow 0.15s" }}
-          onMouseEnter={e => { e.currentTarget.style.transform = "translateY(-2px)"; }} onMouseLeave={e => { e.currentTarget.style.transform = "translateY(0)"; }}>
+        <button onClick={() => setShowReport(true)} style={{ position: "fixed", bottom: 28, right: 24, background: "linear-gradient(135deg,#1e1e2e,#16213e)", border: "1px solid rgba(139,92,246,0.45)", borderRadius: 50, padding: "13px 20px", color: "#c4b5fd", fontSize: 14, fontWeight: 700, cursor: "pointer", display: "flex", alignItems: "center", gap: 7, boxShadow: "0 6px 28px rgba(0,0,0,0.5)", zIndex: 50, transition: "transform 0.15s" }}
+          onMouseEnter={e => e.currentTarget.style.transform = "translateY(-2px)"} onMouseLeave={e => e.currentTarget.style.transform = "translateY(0)"}>
           💡 내기 제보하기
         </button>
       )}
@@ -205,9 +180,9 @@ export default function App() {
                 </div>
                 <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
                   <div><div style={{ fontSize: 12, color: "#888", fontWeight: 600, marginBottom: 6 }}>제보자 이름 <span style={{ color: "#555" }}>(선택)</span></div><input value={reportForm.name} onChange={e => setReportForm(f => ({ ...f, name: e.target.value }))} placeholder="익명으로 제출해도 돼요" style={{ width: "100%", background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 13, padding: "11px 14px", color: "#f0f0f0", fontSize: 14, outline: "none", boxSizing: "border-box" }} /></div>
-                  <div><div style={{ fontSize: 12, color: "#888", fontWeight: 600, marginBottom: 6 }}>내기 이름 <span style={{ color: "#8b5cf6" }}>*</span></div><input value={reportForm.title} onChange={e => setReportForm(f => ({ ...f, title: e.target.value }))} placeholder="예: 젓가락 뽑기, 눈치게임..." style={{ width: "100%", background: "rgba(255,255,255,0.06)", border: `1px solid ${reportForm.title ? "rgba(139,92,246,0.5)" : "rgba(255,255,255,0.1)"}`, borderRadius: 13, padding: "11px 14px", color: "#f0f0f0", fontSize: 14, outline: "none", boxSizing: "border-box", transition: "border-color 0.2s" }} /></div>
+                  <div><div style={{ fontSize: 12, color: "#888", fontWeight: 600, marginBottom: 6 }}>내기 이름 <span style={{ color: "#8b5cf6" }}>*</span></div><input value={reportForm.title} onChange={e => setReportForm(f => ({ ...f, title: e.target.value }))} placeholder="예: 젓가락 뽑기, 눈치게임..." style={{ width: "100%", background: "rgba(255,255,255,0.06)", border: `1px solid ${reportForm.title ? "rgba(139,92,246,0.5)" : "rgba(255,255,255,0.1)"}`, borderRadius: 13, padding: "11px 14px", color: "#f0f0f0", fontSize: 14, outline: "none", boxSizing: "border-box" }} /></div>
                   <div><div style={{ fontSize: 12, color: "#888", fontWeight: 600, marginBottom: 6 }}>설명 / 규칙 <span style={{ color: "#555" }}>(선택)</span></div><textarea value={reportForm.desc} onChange={e => setReportForm(f => ({ ...f, desc: e.target.value }))} placeholder="어떻게 진행하는 내기인지 간단히 적어주세요." rows={3} style={{ width: "100%", background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 13, padding: "11px 14px", color: "#f0f0f0", fontSize: 14, outline: "none", resize: "none", boxSizing: "border-box", fontFamily: "inherit" }} /></div>
-                  <button onClick={submitReport} disabled={!reportForm.title.trim()} style={{ background: reportForm.title.trim() ? "linear-gradient(135deg,#8b5cf6,#6366f1)" : "rgba(255,255,255,0.06)", border: "none", borderRadius: 15, padding: "14px", color: reportForm.title.trim() ? "#fff" : "#444", fontSize: 15, fontWeight: 800, cursor: reportForm.title.trim() ? "pointer" : "not-allowed", boxShadow: reportForm.title.trim() ? "0 4px 20px rgba(139,92,246,0.4)" : "none", transition: "all 0.25s", marginTop: 2 }}>제보 보내기 →</button>
+                  <button onClick={submitReport} disabled={!reportForm.title.trim()} style={{ background: reportForm.title.trim() ? "linear-gradient(135deg,#8b5cf6,#6366f1)" : "rgba(255,255,255,0.06)", border: "none", borderRadius: 15, padding: "14px", color: reportForm.title.trim() ? "#fff" : "#444", fontSize: 15, fontWeight: 800, cursor: reportForm.title.trim() ? "pointer" : "not-allowed", transition: "all 0.25s" }}>제보 보내기 →</button>
                 </div>
               </>
             )}
@@ -218,7 +193,7 @@ export default function App() {
       <style>{`
         @keyframes popIn { from { transform: scale(0.7); opacity: 0; } to { transform: scale(1); opacity: 1; } }
         @keyframes fadeSlideIn { from { transform: translateY(14px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
-        @keyframes slideUp { from { transform: translateY(100%); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
         @keyframes pulse { 0%,100% { box-shadow: 0 0 0 0 rgba(249,115,22,0.6); } 50% { box-shadow: 0 0 0 12px rgba(249,115,22,0); } }
         input::placeholder, textarea::placeholder { color: #444; }
         ::-webkit-scrollbar { display: none; }
