@@ -84,7 +84,7 @@ export default function App() {
                 <BetCard key={bet.id} bet={bet} onClick={() => handleSelectBet(bet)} delay={i * 55} highlighted={highlightedId === bet.id} cardRef={el => { cardRefs.current[bet.id] = el; }} />
               ))}
             </div>
-            <div style={{ textAlign: "center", padding: "32px 0 8px", fontSize: 12, color: "#333", letterSpacing: "0.05em" }}>
+            <div style={{ textAlign: "center", padding: "32px 0 8px", fontSize: 12, color: "#888", letterSpacing: "0.05em" }}>
               made by 시안
             </div>
           </>
@@ -148,7 +148,13 @@ export default function App() {
               </div>
             </div>
 
-            <button disabled={participants.length < 2} onClick={() => setScreen("game")} style={{ width: "100%", background: participants.length >= 2 ? "linear-gradient(135deg,#8b5cf6,#6366f1)" : "rgba(255,255,255,0.05)", border: "none", borderRadius: 18, padding: "16px", color: participants.length >= 2 ? "#fff" : "#444", fontSize: 16, fontWeight: 800, cursor: participants.length >= 2 ? "pointer" : "not-allowed", boxShadow: participants.length >= 2 ? "0 6px 24px rgba(139,92,246,0.4)" : "none", transition: "all 0.3s" }}>
+            <div style={{ height: 80 }} />{/* floating button spacer */}
+          </div>
+        )}
+
+        {screen === "select-participants" && selectedBet && (
+          <div style={{ position: "fixed", bottom: 0, left: 0, right: 0, padding: "12px 20px 28px", background: "linear-gradient(to top, #0d0d1a 60%, transparent)", zIndex: 50, maxWidth: 480, margin: "0 auto" }}>
+            <button disabled={participants.length < 2} onClick={() => setScreen("game")} style={{ width: "100%", background: participants.length >= 2 ? "linear-gradient(135deg,#8b5cf6,#6366f1)" : "rgba(255,255,255,0.08)", border: "none", borderRadius: 18, padding: "16px", color: participants.length >= 2 ? "#fff" : "#444", fontSize: 16, fontWeight: 800, cursor: participants.length >= 2 ? "pointer" : "not-allowed", boxShadow: participants.length >= 2 ? "0 6px 24px rgba(139,92,246,0.5)" : "none", transition: "all 0.3s" }}>
               {participants.length < 2 ? "2명 이상 선택하세요" : `☕ ${participants.length}명으로 내기 시작!`}
             </button>
           </div>

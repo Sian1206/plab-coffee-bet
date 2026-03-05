@@ -1,5 +1,4 @@
 import { useState, useRef, useEffect } from "react";
-
 const COLORS = ["#f97316","#8b5cf6","#22c55e","#ec4899","#eab308","#14b8a6","#60a5fa","#f43f5e","#a78bfa","#34d399"];
 
 export default function RouletteGame({ participants, bet, onBack, onHome }) {
@@ -20,8 +19,7 @@ export default function RouletteGame({ participants, bet, onBack, onHome }) {
     ctx.save();
     ctx.shadowColor = "rgba(0,0,0,0.5)"; ctx.shadowBlur = 20;
     ctx.beginPath(); ctx.arc(cx, cy, r, 0, 2 * Math.PI);
-    ctx.fillStyle = "#111"; ctx.fill();
-    ctx.restore();
+    ctx.fillStyle = "#111"; ctx.fill(); ctx.restore();
     for (let i = 0; i < n; i++) {
       const start = rot + i * sliceAngle, end = start + sliceAngle;
       ctx.beginPath(); ctx.moveTo(cx, cy);
@@ -46,27 +44,13 @@ export default function RouletteGame({ participants, bet, onBack, onHome }) {
   const spin = () => {
     if (spinning) return;
     setSpinning(true); setWinner(null);
-    // 힘차게 시작 → 빠르게 감속 → 마지막에 끈적하게 멈춤
-    const totalRot = (Math.random() * 4 + 8) * 2 * Math.PI;
-    const duration = 5500;
+    const totalRot = (Math.random() * 4 + 9) * 2 * Math.PI;
+    const duration = 6000;
     const start = performance.now();
     const startRot = rotRef.current;
 
-    // ease: 초반 폭발적, 중반 급감속, 후반 끈적한 슬로우
-    const easeOut = (t) => {
-      if (t < 0.15) {
-        // 0~15%: 빠르게 가속 (초반 힘참)
-        return (t / 0.15) * 0.35;
-      } else if (t < 0.55) {
-        // 15~55%: 빠르게 감속
-        const r = (t - 0.15) / 0.4;
-        return 0.35 + r * 0.45;
-      } else {
-        // 55~100%: 끈적하게 마무리 (cubic ease-out)
-        const r = (t - 0.55) / 0.45;
-        return 0.8 + (1 - Math.pow(1 - r, 4)) * 0.2;
-      }
-    };
+    // 순수 감속만 - 절대 빨라지지 않음. easeOutQuart
+    const easeOut = (t) => 1 - Math.pow(1 - t, 4);
 
     const animate = (now) => {
       const t = Math.min((now - start) / duration, 1);
@@ -88,7 +72,7 @@ export default function RouletteGame({ participants, bet, onBack, onHome }) {
   return (
     <GameLayout bet={bet} onBack={onBack} onHome={onHome}>
       <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 20 }}>
-        <div style={{ position: "relative", display: "inline-block" }}>
+        <div style={{ position: "relative" }}>
           <canvas ref={canvasRef} width={300} height={300} style={{ display: "block", borderRadius: "50%" }} />
           <div style={{ position: "absolute", top: "50%", right: -6, transform: "translateY(-50%)", width: 0, height: 0, borderTop: "12px solid transparent", borderBottom: "12px solid transparent", borderRight: "24px solid #fff", filter: "drop-shadow(0 2px 4px rgba(0,0,0,0.5))" }} />
         </div>
@@ -111,7 +95,7 @@ function GameLayout({ bet, onBack, onHome, children }) {
   return (
     <div style={{ padding: "24px 20px 0" }}>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
-        <button onClick={onBack} style={{ background: "none", border: "none", color: "#777", fontSize: 14, cursor: "pointer", display: "flex", alignItems: "center", gap: 4, padding: 0 }}>← 참가자 변경</button>
+        <button onClick={onBack} style={{ background: "none", border: "none", color: "#777", fontSize: 14, cursor: "pointer", padding: 0 }}>← 참가자 변경</button>
         <button onClick={onHome} style={{ background: "rgba(255,255,255,0.07)", border: "none", borderRadius: 10, padding: "6px 12px", color: "#aaa", fontSize: 13, cursor: "pointer" }}>🏠 홈</button>
       </div>
       <div style={{ textAlign: "center", marginBottom: 24 }}>
