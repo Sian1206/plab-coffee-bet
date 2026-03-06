@@ -9,43 +9,43 @@ const HORSES = [
     baseSpeed: (t) => t < 0.25 ? 2.2 : t < 0.6 ? 1.0 : 0.85,
   },
   {
-    id: 2, emoji: "🦄", name: "적토마 Jr.", color: "#ef4444",
+    id: 2, emoji: "🐎", name: "적토마 Jr.", color: "#ef4444",
     story: "삼국지 여포가 타던 그 적토마의 45대손. 혈통서에 적혀있는 말이 사실인지 아무도 확인 못 했지만, 본인은 굳게 믿고 있다. 위기 상황에서 폭발적인 후반 스퍼트를 자랑한다.",
     trait: "후반 폭발력", traitIcon: "🔥",
     baseSpeed: (t) => t < 0.4 ? 0.75 : t < 0.75 ? 1.1 : 2.1,
   },
   {
-    id: 3, emoji: "🐴", name: "뚝심 한라봉", color: "#eab308",
+    id: 3, emoji: "🐎", name: "뚝심 한라봉", color: "#eab308",
     story: "제주도 감귤 농장에서 일하다 어느 날 우연히 경마장 근처를 지나치며 '나도 할 수 있겠다'고 생각했다. 느리지만 절대 멈추지 않는 뚝심으로 베테랑 기수들의 존경을 받는다.",
     trait: "안정적 페이스", traitIcon: "🛡️",
     baseSpeed: (t) => 1.05 + Math.sin(t * Math.PI * 2) * 0.15,
   },
   {
-    id: 4, emoji: "🐆", name: "도심 탈주마", color: "#8b5cf6",
+    id: 4, emoji: "🐎", name: "도심 탈주마", color: "#8b5cf6",
     story: "서울 도심 촬영 현장에서 탈출해 강변북로를 질주한 그 말. 3시간 동안 경찰차를 따돌렸다. 경마장으로 오게 된 건 어차피 달리기를 좋아하니까. 페이스가 예측 불허다.",
     trait: "랜덤 페이스", traitIcon: "🎲",
     baseSpeed: (t) => 0.6 + Math.random() * 1.0,
   },
   {
-    id: 5, emoji: "🦌", name: "설원의 바람", color: "#06b6d4",
+    id: 5, emoji: "🐎", name: "설원의 바람", color: "#06b6d4",
     story: "시베리아 동토에서 썰매를 끌다 글로벌 스카우터 눈에 띄어 한국에 왔다. 영하 40도에서도 멀쩡히 달리던 체력이 장기인데, 한국 여름 더위에 적응 중이다. 중반부터 가속이 붙는다.",
     trait: "중반 가속", traitIcon: "❄️",
     baseSpeed: (t) => t < 0.2 ? 0.7 : t < 0.55 ? 1.35 : 1.2,
   },
   {
-    id: 6, emoji: "🐂", name: "황소 플래비", color: "#22c55e",
+    id: 6, emoji: "🐎", name: "황소 플래비", color: "#22c55e",
     story: "플랩풋볼 운동장 옆 목장 출신. 축구공을 보면 흥분해서 무조건 돌진하는 버릇이 있다. 경마장에 우연히 섞여 들어왔는데 생각보다 꽤 빨라서 다들 당황했다. 전반 몸풀기가 오래 걸린다.",
     trait: "후반 반전", traitIcon: "⚽",
     baseSpeed: (t) => t < 0.5 ? 0.65 : 1.5,
   },
   {
-    id: 7, emoji: "🌙", name: "달빛 나이트", color: "#a78bfa",
+    id: 7, emoji: "🐎", name: "달빛 나이트", color: "#a78bfa",
     story: "낮에는 졸고 밤에만 달리던 야행성 경주마. 경마 대회는 항상 낮에 열려서 인생이 피곤하다. 그래도 마지막 직선 코스에서 갑자기 깨어나는 습관이 있어 역전의 왕이라 불린다.",
     trait: "막판 역전", traitIcon: "🌙",
     baseSpeed: (t) => t < 0.78 ? 0.72 : 2.4,
   },
   {
-    id: 8, emoji: "🦊", name: "꾀돌이 여우비", color: "#ec4899",
+    id: 8, emoji: "🐎", name: "꾀돌이 여우비", color: "#ec4899",
     story: "원래 여우인데 말 코스튬을 입고 경마장에 들어온 것 같다는 소문이 있다. 코너링이 비정상적으로 좋고, 다른 말들이 자꾸 미끄러지는 구간에서 혼자 속도를 낸다. 출처불명의 기록 보유자.",
     trait: "코너 최강", traitIcon: "🦊",
     baseSpeed: (t) => 0.95 + Math.sin(t * Math.PI * 4) * 0.35,
@@ -137,12 +137,68 @@ function HorseRace({ horses, participants, onFinish }) {
     horses.forEach((horse, i) => {
       const y = 24 + i * LANE_H;
       const screenX = START_X + (posRef.current[i] - cam);
-      if (screenX < -30 || screenX > VIEWPORT_W + 30) return;
-
+      const midY = y + LANE_H * 0.58;
+      const ev = eventsRef.current[i];
+      const wobble = Math.sin(tickRef.current * 0.25 + i) * 2;
       const isFinished = finishedRef.current.includes(i);
       const rank = finishedRef.current.indexOf(i);
 
-      // 완주 뱃지
+      // ── 화면 밖인 경우: 엣지에 말 이모지 + 화살표 + 이름 표시 ──
+      const offLeft = screenX < 20;
+      const offRight = screenX > VIEWPORT_W - 20;
+
+      if (offLeft || offRight) {
+        const pillW = 68;
+        const pillX = offLeft ? 0 : VIEWPORT_W - pillW;
+        const labelX = offLeft ? 8 : VIEWPORT_W - 8;
+        const nameAlign = offLeft ? "left" : "right";
+        const arrow = offLeft ? "◀" : "▶";
+
+        // 배경 pill (말 색상)
+        ctx.fillStyle = `${horse.color}44`;
+        ctx.fillRect(pillX, y + 4, pillW, LANE_H - 8);
+        ctx.strokeStyle = horse.color;
+        ctx.lineWidth = 1.5;
+        ctx.strokeRect(pillX, y + 4, pillW, LANE_H - 8);
+
+        // 말 이모지
+        ctx.font = `${LANE_H * 0.5}px serif`;
+        ctx.textAlign = offLeft ? "left" : "right";
+        ctx.fillText("🐎", offLeft ? pillX + 2 : VIEWPORT_W - 2, midY + 6);
+
+        // 화살표 (깜빡임 효과)
+        const blink = Math.floor(tickRef.current / 8) % 2 === 0;
+        if (blink) {
+          ctx.fillStyle = horse.color;
+          ctx.font = "bold 14px sans-serif";
+          ctx.textAlign = offLeft ? "left" : "right";
+          ctx.fillText(arrow, labelX, midY - 2);
+        }
+
+        // 색상 구별 점
+        ctx.beginPath();
+        ctx.arc(offLeft ? pillX + pillW - 8 : pillX + 8, y + 10, 5, 0, 2 * Math.PI);
+        ctx.fillStyle = horse.color;
+        ctx.fill();
+
+        // 이름
+        ctx.font = `bold 8px 'Pretendard',sans-serif`;
+        ctx.fillStyle = "#fff";
+        ctx.textAlign = nameAlign;
+        const nm = participants[i].length > 3 ? participants[i].slice(0, 3) : participants[i];
+        ctx.fillText(nm, offLeft ? pillX + 5 : VIEWPORT_W - 5, midY + 10);
+
+        // 완주 뱃지
+        if (isFinished && rank >= 0) {
+          ctx.font = "bold 8px sans-serif";
+          ctx.fillStyle = rank === 0 ? "#fbbf24" : rank === horses.length - 1 ? "#f87171" : "#94a3b8";
+          ctx.textAlign = nameAlign;
+          ctx.fillText(`${rank + 1}위`, offLeft ? pillX + 5 : VIEWPORT_W - 5, midY - 8);
+        }
+        return;
+      }
+
+      // ── 완주 뱃지 ──
       if (isFinished && rank >= 0) {
         ctx.font = "bold 10px sans-serif";
         ctx.textAlign = "center";
@@ -150,22 +206,25 @@ function HorseRace({ horses, participants, onFinish }) {
         ctx.fillText(`${rank + 1}위`, screenX, y + 12);
       }
 
-      // 말 이모지 (흔들림 효과)
-      const wobble = Math.sin(tickRef.current * 0.25 + i) * 2;
-      const ev = eventsRef.current[i];
+      // ── 말 이모지 (흔들림 효과) ──
+      ctx.save();
+      if (ev.boost > 0) {
+        ctx.shadowColor = horse.color;
+        ctx.shadowBlur = 16;
+      }
       ctx.font = `${LANE_H * 0.6}px serif`;
       ctx.textAlign = "left";
+      ctx.fillText("🐎", screenX - 14, midY + wobble);
+      ctx.restore();
 
-      // 부스트 중이면 글로우
-      if (ev.boost > 0) {
-        ctx.save();
-        ctx.shadowColor = horse.color;
-        ctx.shadowBlur = 14;
-        ctx.fillText(horse.emoji, screenX - 14, y + LANE_H * 0.65 + wobble);
-        ctx.restore();
-      } else {
-        ctx.fillText(horse.emoji, screenX - 14, y + LANE_H * 0.65 + wobble);
-      }
+      // 말 위에 색상 원 (구별용)
+      ctx.beginPath();
+      ctx.arc(screenX + 4, y + 10, 6, 0, 2 * Math.PI);
+      ctx.fillStyle = horse.color;
+      ctx.fill();
+      ctx.strokeStyle = "rgba(0,0,0,0.5)";
+      ctx.lineWidth = 1;
+      ctx.stroke();
 
       // 이름 + 참가자
       ctx.fillStyle = "rgba(255,255,255,0.75)";
@@ -178,7 +237,7 @@ function HorseRace({ horses, participants, onFinish }) {
         ctx.fillStyle = horse.color;
         ctx.font = "bold 9px sans-serif";
         ctx.textAlign = "center";
-        ctx.fillText("💨", screenX + 8, y + 8);
+        ctx.fillText("💨", screenX + 14, y + 8);
       }
       if (ev.stumble > 0) {
         ctx.font = "10px sans-serif";
@@ -196,7 +255,7 @@ function HorseRace({ horses, participants, onFinish }) {
       ctx.fillStyle = rank === 0 ? "#fbbf24" : item.h.color;
       ctx.font = `bold 9px 'Pretendard',sans-serif`;
       ctx.textAlign = "left";
-      ctx.fillText(`${rank + 1}. ${item.h.emoji}${participants[item.i]}`, VIEWPORT_W - 68, 14 + rank * 14);
+      ctx.fillText(`${rank + 1}. ${participants[item.i]}`, VIEWPORT_W - 68, 14 + rank * 14);
     });
   };
 
