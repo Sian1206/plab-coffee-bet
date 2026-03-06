@@ -70,7 +70,7 @@ export default function App() {
   const GameComponent = selectedBet ? GAME_COMPONENTS[selectedBet.game] : null;
 
   return (
-    <div style={{ minHeight: "100vh", background: "linear-gradient(140deg,#0d0d1a 0%,#111827 60%,#0f172a 100%)", fontFamily: "\'Pretendard\',\'Apple SD Gothic Neo\',sans-serif", color: "#f0f0f0", position: "relative" }}>
+    <div style={{ minHeight: "100vh", background: "linear-gradient(140deg,#0d0d1a 0%,#111827 60%,#0f172a 100%)", fontFamily: "Pretendard,'Apple SD Gothic Neo',sans-serif", color: "#f0f0f0", position: "relative" }}>
       <div style={{ position: "fixed", top: -100, right: -80, width: 340, height: 340, borderRadius: "50%", background: "radial-gradient(circle,rgba(139,92,246,0.15) 0%,transparent 70%)", pointerEvents: "none" }} />
       <div style={{ position: "fixed", bottom: -80, left: -60, width: 280, height: 280, borderRadius: "50%", background: "radial-gradient(circle,rgba(249,115,22,0.12) 0%,transparent 70%)", pointerEvents: "none" }} />
 
