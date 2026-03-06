@@ -199,7 +199,7 @@ export default function App() {
         </div>
       )}
 
-      <style>{\`
+      <style>{`
         @keyframes popIn { from { transform: scale(0.7); opacity: 0; } to { transform: scale(1); opacity: 1; } }
         @keyframes fadeSlideIn { from { transform: translateY(14px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
         @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
@@ -207,27 +207,27 @@ export default function App() {
         input::placeholder, textarea::placeholder { color: #444; }
         ::-webkit-scrollbar { display: none; }
         * { box-sizing: border-box; }
-      \`}</style>
+      `}</style>
     </div>
   );
 }
 
 function BetCard({ bet, onClick, delay, highlighted, cardRef }) {
   return (
-    <div ref={cardRef} onClick={onClick} style={{ background: highlighted ? \`\${bet.color}18\` : "rgba(255,255,255,0.04)", border: highlighted ? \`1.5px solid \${bet.color}99\` : "1px solid rgba(255,255,255,0.08)", borderRadius: 22, padding: "18px", cursor: "pointer", transition: "all 0.22s", animation: \`fadeSlideIn 0.4s ease both\`, animationDelay: \`\${delay}ms\`, position: "relative", overflow: "hidden", boxShadow: highlighted ? \`0 0 0 3px \${bet.color}44,0 8px 32px \${bet.color}22\` : "none" }}
-      onMouseEnter={e => { if (!highlighted) { e.currentTarget.style.transform = "translateY(-2px)"; e.currentTarget.style.borderColor = \`\${bet.color}55\`; e.currentTarget.style.background = \`\${bet.color}0f\`; } }}
+    <div ref={cardRef} onClick={onClick} style={{ background: highlighted ? `${bet.color}18` : "rgba(255,255,255,0.04)", border: highlighted ? `1.5px solid ${bet.color}99` : "1px solid rgba(255,255,255,0.08)", borderRadius: 22, padding: "18px", cursor: "pointer", transition: "all 0.22s", animation: `fadeSlideIn 0.4s ease both`, animationDelay: `${delay}ms`, position: "relative", overflow: "hidden", boxShadow: highlighted ? `0 0 0 3px ${bet.color}44,0 8px 32px ${bet.color}22` : "none" }}
+      onMouseEnter={e => { if (!highlighted) { e.currentTarget.style.transform = "translateY(-2px)"; e.currentTarget.style.borderColor = `${bet.color}55`; e.currentTarget.style.background = `${bet.color}0f`; } }}
       onMouseLeave={e => { if (!highlighted) { e.currentTarget.style.transform = "translateY(0)"; e.currentTarget.style.borderColor = "rgba(255,255,255,0.08)"; e.currentTarget.style.background = "rgba(255,255,255,0.04)"; } }}>
-      <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: 3, background: \`linear-gradient(90deg,\${bet.color},transparent)\`, borderRadius: "22px 22px 0 0" }} />
-      {highlighted && <div style={{ position: "absolute", inset: 0, background: \`radial-gradient(ellipse at center,\${bet.color}12 0%,transparent 70%)\`, pointerEvents: "none", borderRadius: 22 }} />}
+      <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: 3, background: `linear-gradient(90deg,${bet.color},transparent)`, borderRadius: "22px 22px 0 0" }} />
+      {highlighted && <div style={{ position: "absolute", inset: 0, background: `radial-gradient(ellipse at center,${bet.color}12 0%,transparent 70%)`, pointerEvents: "none", borderRadius: 22 }} />}
       <div style={{ display: "flex", gap: 14, alignItems: "flex-start" }}>
-        <div style={{ width: 52, height: 52, borderRadius: 16, background: \`\${bet.color}22\`, border: \`1px solid \${bet.color}33\`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 26, flexShrink: 0, animation: highlighted ? "pulse 0.9s ease 2" : "none" }}>{bet.emoji}</div>
+        <div style={{ width: 52, height: 52, borderRadius: 16, background: `${bet.color}22`, border: `1px solid ${bet.color}33`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 26, flexShrink: 0, animation: highlighted ? "pulse 0.9s ease 2" : "none" }}>{bet.emoji}</div>
         <div style={{ flex: 1, minWidth: 0 }}>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 4 }}>
             <div style={{ fontWeight: 800, fontSize: 16, lineHeight: 1.3, display: "flex", alignItems: "center", gap: 7, flexWrap: "wrap" }}>
               {bet.title}
               {bet.tag && <span style={{ fontSize: 10, background: bet.tag === "인기" ? "rgba(249,115,22,0.25)" : "rgba(34,197,94,0.2)", color: bet.tag === "인기" ? "#fb923c" : "#4ade80", borderRadius: 6, padding: "2px 7px", fontWeight: 700 }}>{bet.tag}</span>}
             </div>
-            <span style={{ fontSize: 11, color: bet.color, background: \`\${bet.color}22\`, borderRadius: 8, padding: "3px 8px", fontWeight: 700, flexShrink: 0, marginLeft: 8 }}>{bet.category}</span>
+            <span style={{ fontSize: 11, color: bet.color, background: `${bet.color}22`, borderRadius: 8, padding: "3px 8px", fontWeight: 700, flexShrink: 0, marginLeft: 8 }}>{bet.category}</span>
           </div>
           <div style={{ fontSize: 13, color: "#aaa", marginBottom: 11, lineHeight: 1.5 }}>{bet.description}</div>
           <div style={{ display: "flex", gap: 10 }}>
