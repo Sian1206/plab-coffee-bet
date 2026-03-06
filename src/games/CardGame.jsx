@@ -1,42 +1,32 @@
 import { useState } from "react";
 const COLORS = ["#f97316","#8b5cf6","#22c55e","#ec4899","#eab308","#14b8a6","#60a5fa","#f43f5e"];
-
-// 플래비 이미지 URL (업로드된 이미지)
 const FLABY_URL = "/flaby.png";
 
-// 신용카드 SVG
 function CreditCard({ size }) {
-  const s = size * 0.72;
+  const w = size * 0.88, h = size * 0.58;
   return (
-    <svg width={s} height={s * 0.63} viewBox="0 0 80 50">
-      <rect x={1} y={1} width={78} height={48} rx={6} fill="url(#cg)" stroke="rgba(255,255,255,0.3)" strokeWidth={1}/>
+    <svg width={w} height={h} viewBox="0 0 88 58">
       <defs>
-        <linearGradient id="cg" x1="0%" y1="0%" x2="100%" y2="100%">
+        <linearGradient id="cg2" x1="0%" y1="0%" x2="100%" y2="100%">
           <stop offset="0%" stopColor="#1a237e"/>
           <stop offset="100%" stopColor="#4a148c"/>
         </linearGradient>
       </defs>
-      <rect x={6} y={18} width={20} height={14} rx={2} fill="#ffd700" opacity={0.9}/>
-      <text x={40} y={38} textAnchor="middle" fill="rgba(255,255,255,0.6)" fontSize={5} fontFamily="monospace">•••• •••• •••• 1234</text>
-      <circle cx={58} cy={12} r={7} fill="#ef5350" opacity={0.8}/>
-      <circle cx={65} cy={12} r={7} fill="#ff8f00" opacity={0.8}/>
+      <rect x={1} y={1} width={86} height={56} rx={7} fill="url(#cg2)" stroke="rgba(255,255,255,0.25)" strokeWidth={1}/>
+      <rect x={7} y={20} width={22} height={16} rx={3} fill="#ffd700" opacity={0.9}/>
+      <text x={44} y={46} textAnchor="middle" fill="rgba(255,255,255,0.55)" fontSize={5.5} fontFamily="monospace">•••• •••• •••• 1234</text>
+      <circle cx={64} cy={14} r={8} fill="#ef5350" opacity={0.8}/>
+      <circle cx={72} cy={14} r={8} fill="#ff8f00" opacity={0.8}/>
     </svg>
   );
 }
 
-// 카드 뒷면 — 플래비 이미지
 function CardBack({ size }) {
   return (
     <div style={{ width: size, height: size, borderRadius: 10, background: "linear-gradient(135deg,#1e1b4b,#312e81)", border: "2px solid rgba(139,92,246,0.5)", display: "flex", alignItems: "center", justifyContent: "center", overflow: "hidden", position: "relative", boxShadow: "0 3px 10px rgba(0,0,0,0.5)" }}>
-      <div style={{ position: "absolute", inset: 0, opacity: 0.08, backgroundImage: "radial-gradient(circle, rgba(255,255,255,0.4) 1px, transparent 1px)", backgroundSize: "10px 10px" }} />
-      <img
-        src={FLABY_URL}
-        alt="flaby"
-        style={{ width: size * 0.72, height: size * 0.72, objectFit: "contain", position: "relative", zIndex: 1 }}
-        onError={e => { e.target.style.display = "none"; e.target.nextSibling.style.display = "flex"; }}
-      />
-      {/* Fallback if image fails */}
-      <div style={{ display: "none", position: "absolute", inset: 0, alignItems: "center", justifyContent: "center", fontSize: size * 0.45 }}>😎</div>
+      <div style={{ position: "absolute", inset: 0, opacity: 0.07, backgroundImage: "radial-gradient(circle, rgba(255,255,255,0.5) 1px, transparent 1px)", backgroundSize: "10px 10px" }} />
+      <img src={FLABY_URL} alt="flaby" style={{ width: size * 0.68, height: size * 0.68, objectFit: "contain", position: "relative", zIndex: 1 }}
+        onError={e => { e.target.style.display = "none"; }} />
     </div>
   );
 }
@@ -51,8 +41,10 @@ export default function CardGame({ participants, bet, onBack, onHome }) {
   const [loser, setLoser] = useState(null);
 
   const totalCards = n * cardMult;
-  const maxCols = totalCards <= 6 ? 3 : totalCards <= 10 ? 4 : 5;
-  const cardSize = Math.min(62, Math.floor(300 / maxCols) - 7);
+
+  // 정사각형에 가까운 cols/rows 계산
+  const cols = Math.ceil(Math.sqrt(totalCards));
+  const cardSize = Math.min(64, Math.floor((300 - (cols - 1) * 6) / cols));
 
   const startGame = () => {
     const bomb = Math.floor(Math.random() * totalCards);
@@ -83,12 +75,14 @@ export default function CardGame({ participants, bet, onBack, onHome }) {
             </div>
             <div style={{ display: "flex", gap: 10 }}>
               {[2, 3].map(mult => (
-                <button key={mult} onClick={() => setCardMult(mult)} style={{ background: cardMult === mult ? "linear-gradient(135deg,#ec4899,#db2777)" : "rgba(255,255,255,0.07)", border: "none", borderRadius: 12, padding: "10px 20px", color: cardMult === mult ? "#fff" : "#aaa", fontSize: 13, fontWeight: 700, cursor: "pointer", transition: "all 0.2s" }}>
+                <button key={mult} onClick={() => setCardMult(mult)}
+                  style={{ background: cardMult === mult ? "linear-gradient(135deg,#ec4899,#db2777)" : "rgba(255,255,255,0.07)", border: "none", borderRadius: 12, padding: "10px 20px", color: cardMult === mult ? "#fff" : "#aaa", fontSize: 13, fontWeight: 700, cursor: "pointer", transition: "all 0.2s" }}>
                   카드 {n * mult}장 (×{mult})
                 </button>
               ))}
             </div>
-            <button onClick={startGame} style={{ background: "linear-gradient(135deg,#ec4899,#db2777)", border: "none", borderRadius: 18, padding: "16px 48px", color: "#fff", fontSize: 17, fontWeight: 800, cursor: "pointer", boxShadow: "0 6px 24px rgba(236,72,153,0.5)" }}>
+            <button onClick={startGame}
+              style={{ background: "linear-gradient(135deg,#ec4899,#db2777)", border: "none", borderRadius: 18, padding: "16px 48px", color: "#fff", fontSize: 17, fontWeight: 800, cursor: "pointer", boxShadow: "0 6px 24px rgba(236,72,153,0.5)" }}>
               🃏 카드 깔기
             </button>
           </>
@@ -97,13 +91,14 @@ export default function CardGame({ participants, bet, onBack, onHome }) {
         {(phase === "playing" || phase === "done") && (
           <>
             {phase === "playing" && (
-              <div style={{ background: `${COLORS[currentPlayerIdx%COLORS.length]}22`, border: `1.5px solid ${COLORS[currentPlayerIdx%COLORS.length]}55`, borderRadius: 16, padding: "9px 18px", textAlign: "center", width: "100%" }}>
+              <div style={{ background: `${COLORS[currentPlayerIdx % COLORS.length]}22`, border: `1.5px solid ${COLORS[currentPlayerIdx % COLORS.length]}55`, borderRadius: 16, padding: "9px 18px", textAlign: "center", width: "100%" }}>
                 <div style={{ fontSize: 11, color: "#777", marginBottom: 2 }}>지금 고를 차례</div>
-                <div style={{ fontSize: 20, fontWeight: 900, color: COLORS[currentPlayerIdx%COLORS.length] }}>{participants[currentPlayerIdx]}</div>
+                <div style={{ fontSize: 20, fontWeight: 900, color: COLORS[currentPlayerIdx % COLORS.length] }}>{participants[currentPlayerIdx]}</div>
               </div>
             )}
 
-            <div style={{ display: "flex", flexWrap: "wrap", gap: 6, justifyContent: "center", width: "100%" }}>
+            {/* 정사각형 그리드 */}
+            <div style={{ display: "grid", gridTemplateColumns: `repeat(${cols}, ${cardSize}px)`, gap: 6, justifyContent: "center" }}>
               {cards.map((card) => {
                 const isFlipped = flippedBy[card.id] !== undefined;
                 const flipperIdx = flippedBy[card.id];
@@ -112,19 +107,19 @@ export default function CardGame({ participants, bet, onBack, onHome }) {
                   <div key={card.id} onClick={() => flipCard(card.id)}
                     style={{ cursor: isFlipped || phase === "done" ? "default" : "pointer", transition: "transform 0.15s", transform: isFlipped ? "scale(1.04)" : "scale(1)" }}>
                     {isFlipped ? (
-                      <div style={{ width: cardSize, height: cardSize, borderRadius: 10, background: isBomb ? "linear-gradient(135deg,#0f172a,#1e1b4b)" : "#f8fafc", border: isBomb ? "2.5px solid #818cf8" : "2px solid #e2e8f0", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", boxShadow: isBomb ? "0 0 22px rgba(129,140,248,0.6)" : "0 2px 8px rgba(0,0,0,0.15)", animation: "popIn 0.25s ease", overflow: "hidden" }}>
+                      <div style={{ width: cardSize, height: cardSize, borderRadius: 10, background: isBomb ? "linear-gradient(135deg,#0f172a,#1e1b4b)" : "#f8fafc", border: isBomb ? "2.5px solid #818cf8" : "2px solid #e2e8f0", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", boxShadow: isBomb ? "0 0 22px rgba(129,140,248,0.65)" : "0 2px 8px rgba(0,0,0,0.15)", animation: "popIn 0.25s ease", overflow: "hidden" }}>
                         {isBomb ? (
                           <>
                             <CreditCard size={cardSize} />
-                            <div style={{ fontSize: 7, fontWeight: 700, color: "#818cf8", marginTop: 3, textAlign: "center" }}>
-                              {participants[flipperIdx].length > 4 ? participants[flipperIdx].slice(0,4)+"…" : participants[flipperIdx]}
+                            <div style={{ fontSize: 7, fontWeight: 700, color: "#818cf8", marginTop: 2, textAlign: "center" }}>
+                              {participants[flipperIdx].length > 4 ? participants[flipperIdx].slice(0, 4) + "…" : participants[flipperIdx]}
                             </div>
                           </>
                         ) : (
                           <>
-                            <div style={{ fontSize: Math.floor(cardSize * 0.38) }}>☕</div>
-                            <div style={{ fontSize: 7, fontWeight: 700, color: COLORS[flipperIdx%COLORS.length], marginTop: 2, textAlign: "center" }}>
-                              {participants[flipperIdx].length > 4 ? participants[flipperIdx].slice(0,4)+"…" : participants[flipperIdx]}
+                            <div style={{ fontSize: Math.floor(cardSize * 0.4) }}>☕</div>
+                            <div style={{ fontSize: 7, fontWeight: 700, color: COLORS[flipperIdx % COLORS.length], marginTop: 2, textAlign: "center" }}>
+                              {participants[flipperIdx].length > 4 ? participants[flipperIdx].slice(0, 4) + "…" : participants[flipperIdx]}
                             </div>
                           </>
                         )}
@@ -146,8 +141,14 @@ export default function CardGame({ participants, bet, onBack, onHome }) {
             )}
 
             <div style={{ display: "flex", gap: 10, width: "100%" }}>
-              <button onClick={startGame} style={{ flex: 1, background: "linear-gradient(135deg,#ec4899,#db2777)", border: "none", borderRadius: 14, padding: "13px", color: "#fff", fontSize: 14, fontWeight: 700, cursor: "pointer" }}>다시 하기</button>
-              <button onClick={reset} style={{ flex: 1, background: "rgba(255,255,255,0.07)", border: "1px solid rgba(255,255,255,0.12)", borderRadius: 14, padding: "13px", color: "#ccc", fontSize: 14, fontWeight: 700, cursor: "pointer" }}>설정 변경</button>
+              <button onClick={startGame}
+                style={{ flex: 1, background: "linear-gradient(135deg,#ec4899,#db2777)", border: "none", borderRadius: 14, padding: "13px", color: "#fff", fontSize: 14, fontWeight: 700, cursor: "pointer" }}>
+                다시 하기
+              </button>
+              <button onClick={reset}
+                style={{ flex: 1, background: "rgba(255,255,255,0.07)", border: "1px solid rgba(255,255,255,0.12)", borderRadius: 14, padding: "13px", color: "#ccc", fontSize: 14, fontWeight: 700, cursor: "pointer" }}>
+                설정 변경
+              </button>
             </div>
           </>
         )}
