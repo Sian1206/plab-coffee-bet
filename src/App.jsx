@@ -1,6 +1,5 @@
 import { useState, useRef } from "react";
 import RouletteGame from "./games/RouletteGame";
-import MarbleGame from "./games/MarbleGame";
 import LadderGame from "./games/LadderGame";
 import CardGame from "./games/CardGame";
 import DiceGame from "./games/DiceGame";
@@ -9,7 +8,6 @@ import HorseGame from "./games/HorseGame";
 
 const BETS = [
   { id: 1, emoji: "🎡", title: "룰렛 돌리기", description: "참가자 이름을 넣고 룰렛을 돌려 한 명을 뽑아요.", recommendedCount: "2~10명", winnerCount: "1명", category: "뽑기", color: "#f97316", tag: "인기", game: "roulette", needParticipants: true },
-  { id: 2, emoji: "🎰", title: "마블 룰렛", description: "각자의 구슬이 핀을 튕기며 떨어져요. 먼저 or 마지막 착지자가 커피를!", recommendedCount: "2~8명", winnerCount: "1명", category: "뽑기", color: "#8b5cf6", tag: null, game: "marble", needParticipants: true },
   { id: 3, emoji: "🪜", title: "사다리 타기", description: "사다리를 타고 내려가 💰를 피하세요! 돈 걸린 사람이 커피 한 잔 쏩니다.", recommendedCount: "2~8명", winnerCount: "꼴찌 1명", category: "사다리", color: "#22c55e", tag: null, game: "ladder", needParticipants: true },
   { id: 4, emoji: "🃏", title: "카드 뒤집기", description: "돌아가며 플래비 카드를 한 장씩 뒤집어요. 💳 신용카드를 고른 사람이 커피를!", recommendedCount: "2~6명", winnerCount: "꼴찌 1명", category: "카드", color: "#ec4899", tag: null, game: "card", needParticipants: true },
   { id: 5, emoji: "🎲", title: "주사위 던지기", description: "드래그로 주사위를 던져요! 최고점 or 최저점자가 커피를 쏩니다.", recommendedCount: "2~6명", winnerCount: "1명", category: "주사위", color: "#eab308", tag: null, game: "dice", needParticipants: true },
@@ -18,7 +16,7 @@ const BETS = [
 ];
 
 const CATEGORIES = ["전체", "뽑기", "사다리", "카드", "주사위", "기록"];
-const GAME_COMPONENTS = { roulette: RouletteGame, marble: MarbleGame, ladder: LadderGame, card: CardGame, dice: DiceGame, chovy: ChovyGame, horse: HorseGame };
+const GAME_COMPONENTS = { roulette: RouletteGame, ladder: LadderGame, card: CardGame, dice: DiceGame, chovy: ChovyGame, horse: HorseGame };
 
 const ALL_MEMBERS = (() => {
   const rest = ["호두","라크","정남","루니","번즈","쿠스","키커","아쿠","뿌까",

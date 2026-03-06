@@ -69,7 +69,7 @@ export default function DiceGame({ participants, bet, onBack, onHome }) {
   };
 
   const startDrag = (cx, cy) => {
-    if (rolling || phase !== "playing") return;
+    if (rolling || (phase !== "playing" && phase !== "rematch")) return;
     const rect = areaRef.current?.getBoundingClientRect();
     if (!rect) return;
     dragRef.current = { sx: cx-rect.left, sy: cy-rect.top, t: Date.now() };
